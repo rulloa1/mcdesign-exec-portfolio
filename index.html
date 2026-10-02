@@ -183,6 +183,139 @@
         <a href="#" id="mobile-resume-link" class="mobile-link text-brand-gold border-b border-brand-gold pb-1">View Resume</a>
     </div>
 
+    <!-- 0. HERO SECTION (ISOLATED 100svh CONTAINER) -->
+    <section id="hero" aria-label="Executive Construction Operations Leadership" class="relative w-full min-h-[100svh] bg-[#050505] text-white flex flex-col justify-between overflow-hidden z-10 pt-28 pb-12 px-6 md:px-16">
+        
+        <!-- LAYER 1: Background Media Video & Directional Dark Overlay -->
+        <div class="absolute inset-0 z-0 overflow-hidden pointer-events-none select-none">
+            <video id="hero-bg-video" autoplay muted loop playsinline poster="https://mcdesign.bio/__l5e/assets-v1/d001ed49-0dab-46d2-aa4b-41a1506b0e16/miami-beach-sunset-pool.png" class="w-full h-full object-cover object-center opacity-30 scale-105 transition-opacity duration-1000" aria-hidden="true">
+                <source src="./miami-beach.mp4" type="video/mp4">
+            </video>
+            <!-- Gradient Overlay for readability -->
+            <div class="absolute inset-0 z-1" style="background: linear-gradient(135deg, rgba(5,5,5,0.95) 0%, rgba(5,5,5,0.78) 50%, rgba(5,5,5,0.92) 100%);" aria-hidden="true"></div>
+            <div class="absolute inset-0 z-2" style="background: radial-gradient(circle at 80% 30%, rgba(212, 175, 55, 0.08) 0%, transparent 65%);" aria-hidden="true"></div>
+        </div>
+
+        <!-- LAYER 2: Architectural Grid Canvas (Sparse Gold Points & Vector CAD Lines) -->
+        <canvas id="architectural-hero-canvas" class="absolute inset-0 z-10 pointer-events-none" aria-hidden="true"></canvas>
+
+        <!-- LAYER 3: Noise Texture Overlay (3.5% Opacity) -->
+        <div class="absolute inset-0 z-15 pointer-events-none opacity-[0.035]" style="background-image: url(&quot;data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E&quot;);" aria-hidden="true"></div>
+
+        <!-- LAYER 4: Hero Content Container -->
+        <div class="relative z-20 max-w-7xl mx-auto w-full my-auto grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+            
+            <!-- Left Column: Primary Editorial Copy & Actions -->
+            <div class="lg:col-span-8 flex flex-col items-start text-left space-y-6">
+                
+                <!-- Eyebrow Badge & Verified Name -->
+                <div class="flex flex-wrap items-center gap-3">
+                    <span class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-[#D4AF37]/30 bg-[#D4AF37]/10 text-[#D4AF37] text-xs font-semibold tracking-[0.2em] uppercase backdrop-blur-md">
+                        <span class="w-1.5 h-1.5 rounded-full bg-[#D4AF37] animate-pulse"></span>
+                        CONSTRUCTION • OPERATIONS • LEADERSHIP
+                    </span>
+                    <span class="text-brand-gray text-xs font-mono tracking-widest uppercase">| Michael Chandler</span>
+                </div>
+
+                <!-- Main Display Heading with Restrained Underline -->
+                <h1 class="font-serif text-4xl sm:text-5xl md:text-6xl lg:text-7xl text-white font-normal leading-[1.1] tracking-tight">
+                    Strategic leadership.<br>
+                    <span class="relative inline-block mt-1 pb-2 group">
+                        Disciplined execution.
+                        <span id="hero-underline" class="absolute bottom-0 left-0 w-full h-[2px] bg-gradient-to-r from-[#D4AF37] via-[#f3e5ab] to-transparent origin-left transform scale-x-0 transition-transform duration-1000 ease-out" aria-hidden="true"></span>
+                    </span>
+                </h1>
+
+                <!-- Supporting Copy -->
+                <p class="text-brand-gray text-lg md:text-xl font-light leading-relaxed max-w-2xl pt-2">
+                    Explore my background in construction operations, project delivery, and team leadership.
+                </p>
+
+                <!-- Actions -->
+                <div class="flex flex-wrap items-center gap-4 pt-4">
+                    <!-- Primary CTA -->
+                    <a href="#experience" class="group relative inline-flex items-center gap-3 px-7 py-3.5 bg-[#D4AF37] text-[#0a0a0a] font-medium text-sm tracking-wider uppercase border border-[#D4AF37] transition-all duration-300 hover:bg-transparent hover:text-[#D4AF37] hover:shadow-[0_0_25px_rgba(212,175,55,0.35)] focus:outline-none focus:ring-2 focus:ring-[#D4AF37]">
+                        <span>Explore Experience</span>
+                        <svg class="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+                        </svg>
+                    </a>
+
+                    <!-- Secondary CTA: View Resume -->
+                    <a href="https://mcdesign.bio/resume" id="hero-resume-cta" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-2.5 px-7 py-3.5 bg-transparent text-[#D4AF37] font-medium text-sm tracking-wider uppercase border border-[#D4AF37]/40 backdrop-blur-sm transition-all duration-300 hover:border-[#D4AF37] hover:bg-[#D4AF37]/10 focus:outline-none focus:ring-2 focus:ring-[#D4AF37]">
+                        <span>View Resume</span>
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                        </svg>
+                    </a>
+
+                    <!-- Additional Text Link: Get in Touch -->
+                    <a href="#contact" class="inline-flex items-center gap-1.5 px-4 py-3.5 text-brand-gray hover:text-[#D4AF37] text-sm font-medium tracking-wider uppercase transition-colors border-b border-transparent hover:border-[#D4AF37]">
+                        <span>Get in Touch</span>
+                        <span class="text-xs">→</span>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Right Column: Executive Specification Card (Desktop) -->
+            <div class="hidden lg:flex lg:col-span-4 flex-col justify-center">
+                <div class="p-8 rounded-sm glass-panel border border-[#D4AF37]/25 relative overflow-hidden group">
+                    <!-- Corner CAD Vector Accents -->
+                    <div class="absolute top-0 left-0 w-3 h-3 border-t-2 border-l-2 border-[#D4AF37]"></div>
+                    <div class="absolute top-0 right-0 w-3 h-3 border-t-2 border-r-2 border-[#D4AF37]"></div>
+                    <div class="absolute bottom-0 left-0 w-3 h-3 border-b-2 border-l-2 border-[#D4AF37]"></div>
+                    <div class="absolute bottom-0 right-0 w-3 h-3 border-b-2 border-r-2 border-[#D4AF37]"></div>
+
+                    <div class="flex items-center justify-between border-b border-[#D4AF37]/20 pb-4 mb-6">
+                        <span class="text-[#D4AF37] font-mono text-xs tracking-widest uppercase">EXECUTIVE SPECIFICATION</span>
+                        <span class="text-brand-gray font-mono text-[10px]">VERIFIED RECORD</span>
+                    </div>
+
+                    <div class="space-y-6">
+                        <div>
+                            <p class="text-brand-gray text-xs font-mono uppercase tracking-wider mb-1">CAPITAL DELIVERED</p>
+                            <p class="text-3xl font-serif text-white font-medium">$500M+ <span class="text-[#D4AF37] text-xl font-sans font-light">USD</span></p>
+                            <p class="text-brand-gray text-xs font-light mt-1">Ultra-luxury residential, private club hospitality & civil infrastructure</p>
+                        </div>
+
+                        <div class="border-t border-white/10 pt-4">
+                            <p class="text-brand-gray text-xs font-mono uppercase tracking-wider mb-2">OPERATIONAL CORE</p>
+                            <div class="flex flex-wrap gap-2">
+                                <span class="px-2.5 py-1 text-xs bg-[#D4AF37]/10 text-brand-light border border-[#D4AF37]/20">Construction Ops</span>
+                                <span class="px-2.5 py-1 text-xs bg-[#D4AF37]/10 text-brand-light border border-[#D4AF37]/20">Owner Rep</span>
+                                <span class="px-2.5 py-1 text-xs bg-[#D4AF37]/10 text-brand-light border border-[#D4AF37]/20">Project Delivery</span>
+                                <span class="px-2.5 py-1 text-xs bg-[#D4AF37]/10 text-brand-light border border-[#D4AF37]/20">P&L Stewardship</span>
+                            </div>
+                        </div>
+
+                        <div class="border-t border-white/10 pt-4 flex items-center justify-between">
+                            <span class="text-brand-gray text-xs font-mono">STATUS</span>
+                            <span class="inline-flex items-center gap-2 text-xs text-[#D4AF37]">
+                                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
+                                Available for Operations Leadership
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Hero Bottom Footer Bar -->
+        <div class="relative z-20 max-w-7xl mx-auto w-full flex items-center justify-between text-xs text-brand-gray font-mono border-t border-white/10 pt-6">
+            <div class="flex items-center gap-4">
+                <span class="text-[#D4AF37]">01 / HERO</span>
+                <span class="hidden sm:inline">STEEL • CONCRETE • GLASS • WALNUT</span>
+            </div>
+            <a href="#sequence-container" class="flex items-center gap-2 text-brand-gray hover:text-[#D4AF37] transition-colors group">
+                <span>SCROLL TO OVERVIEW</span>
+                <svg class="w-4 h-4 text-[#D4AF37] transition-transform duration-300 group-hover:translate-y-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path>
+                </svg>
+            </a>
+        </div>
+    </section>
+
     <!-- CANVAS SCROLL SEQUENCE -->
     <section id="sequence-container" aria-label="Cinematic Portfolio Overview">
         <div class="canvas-sticky-wrap">
@@ -1026,41 +1159,332 @@
         setTimeout(setupScrollTrigger, 100);
 
         // =====================================================================
-        // AUTO SCROLL FEATURE
+        // ARCHITECTURAL HERO CANVAS & HERO INTERACTION
         // =====================================================================
-        let autoScrollInterval = null;
-        let userInteractedTimeout = null;
+        // =====================================================================
+        // ARCHITECTURAL HERO CANVAS & CONSTELLATION INTERACTION
+        // =====================================================================
+        (function initArchitecturalCanvas() {
+            const heroSection = document.getElementById("hero");
+            const heroCanvas = document.getElementById("architectural-hero-canvas");
+            const underline = document.getElementById("hero-underline");
+            if (!heroCanvas || !heroSection) return;
 
-        function startAutoScroll() {
-            if (autoScrollInterval) return;
-            autoScrollInterval = setInterval(() => {
-                if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight - 10) {
-                    window.scrollTo({ top: 0, behavior: 'smooth' });
+            const ctx = heroCanvas.getContext("2d");
+            if (!ctx) return;
+
+            let animId = null;
+            let width = 0;
+            let height = 0;
+            let dpr = 1;
+            let lastTime = 0;
+
+            const mouse = { x: -9999, y: -9999, active: false };
+            let isIntersecting = true;
+            let isDocumentVisible = true;
+
+            const motionQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
+            let prefersReducedMotion = motionQuery.matches;
+
+            const hoverQuery = window.matchMedia("(pointer: fine) and (hover: hover)");
+            let hasHover = hoverQuery.matches;
+
+            if (underline) {
+                if (prefersReducedMotion) {
+                    underline.style.transform = "scaleX(1)";
                 } else {
-                    window.scrollBy({ top: 2, behavior: 'smooth' });
+                    setTimeout(() => {
+                        underline.style.transform = "scaleX(1)";
+                    }, 350);
                 }
-            }, 30);
-        }
-
-        function stopAutoScroll() {
-            if (autoScrollInterval) {
-                clearInterval(autoScrollInterval);
-                autoScrollInterval = null;
             }
-        }
 
-        function handleUserInteraction() {
-            stopAutoScroll();
-            clearTimeout(userInteractedTimeout);
-            userInteractedTimeout = setTimeout(startAutoScroll, 4000);
-        }
+            const MAX_CONN_DIST = 170;
+            const MAX_CONN_DIST_SQ = MAX_CONN_DIST * MAX_CONN_DIST; // 28900
+            const REPULSION_DIST = 180;
+            const REPULSION_DIST_SQ = REPULSION_DIST * REPULSION_DIST; // 32400
+            const MAX_CONNECTIONS_PER_NODE = 3;
+            const MAX_PULSES = 4;
 
-        ['wheel', 'touchstart', 'keydown', 'mousedown'].forEach(evt => {
-            window.addEventListener(evt, handleUserInteraction, { passive: true });
-        });
+            let nodes = [];
+            let pulses = [];
 
-        setTimeout(startAutoScroll, 1500);
+            function initNodes(w, h) {
+                if (w <= 0 || h <= 0) return;
+                const targetCount = w < 768 ? 24 : 60;
+                nodes = [];
+                for (let i = 0; i < targetCount; i++) {
+                    const angle = Math.random() * Math.PI * 2;
+                    const speed = 0.1 + Math.random() * 0.25;
+                    const baseVx = Math.cos(angle) * speed;
+                    const baseVy = Math.sin(angle) * speed;
+                    nodes.push({
+                        x: Math.random() * w,
+                        y: Math.random() * h,
+                        vx: baseVx,
+                        vy: baseVy,
+                        baseVx: baseVx,
+                        baseVy: baseVy,
+                        radius: 1.2 + Math.random() * 0.8,
+                        opacity: 0.25 + Math.random() * 0.35,
+                        connectionsCount: 0
+                    });
+                }
+                pulses = [];
+            }
 
+            function drawStatic() {
+                if (width <= 0 || height <= 0) return;
+                ctx.clearRect(0, 0, width, height);
+
+                for (let i = 0; i < nodes.length; i++) nodes[i].connectionsCount = 0;
+
+                for (let i = 0; i < nodes.length; i++) {
+                    const nodeA = nodes[i];
+                    if (nodeA.connectionsCount >= MAX_CONNECTIONS_PER_NODE) continue;
+
+                    for (let j = i + 1; j < nodes.length; j++) {
+                        const nodeB = nodes[j];
+                        if (nodeB.connectionsCount >= MAX_CONNECTIONS_PER_NODE) continue;
+
+                        const dx = nodeB.x - nodeA.x;
+                        const dy = nodeB.y - nodeA.y;
+                        const distSq = dx * dx + dy * dy;
+
+                        if (distSq < MAX_CONN_DIST_SQ) {
+                            const alpha = (1 - distSq / MAX_CONN_DIST_SQ) * 0.12;
+                            ctx.strokeStyle = `rgba(212, 175, 55, ${alpha.toFixed(3)})`;
+                            ctx.lineWidth = 0.8;
+                            ctx.beginPath();
+                            ctx.moveTo(nodeA.x, nodeA.y);
+                            ctx.lineTo(nodeB.x, nodeB.y);
+                            ctx.stroke();
+
+                            nodeA.connectionsCount++;
+                            nodeB.connectionsCount++;
+                        }
+                    }
+                }
+
+                for (let i = 0; i < nodes.length; i++) {
+                    const n = nodes[i];
+                    ctx.fillStyle = `rgba(212, 175, 55, ${n.opacity.toFixed(2)})`;
+                    ctx.beginPath();
+                    ctx.arc(n.x, n.y, n.radius, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+            }
+
+            function handleResize() {
+                const rect = heroSection.getBoundingClientRect();
+                const newWidth = Math.floor(rect.width || window.innerWidth);
+                const newHeight = Math.floor(rect.height || window.innerHeight);
+                if (newWidth <= 0 || newHeight <= 0) return;
+
+                const oldWidth = width;
+                const oldHeight = height;
+
+                dpr = Math.min(window.devicePixelRatio || 1, 2);
+
+                heroCanvas.width = Math.floor(newWidth * dpr);
+                heroCanvas.height = Math.floor(newHeight * dpr);
+                heroCanvas.style.width = newWidth + "px";
+                heroCanvas.style.height = newHeight + "px";
+
+                ctx.setTransform(1, 0, 0, 1, 0, 0);
+                ctx.scale(dpr, dpr);
+
+                width = newWidth;
+                height = newHeight;
+
+                if (nodes.length === 0 || oldWidth === 0 || oldHeight === 0) {
+                    initNodes(newWidth, newHeight);
+                } else {
+                    const scaleX = newWidth / oldWidth;
+                    const scaleY = newHeight / oldHeight;
+                    for (let i = 0; i < nodes.length; i++) {
+                        nodes[i].x *= scaleX;
+                        nodes[i].y *= scaleY;
+                    }
+                }
+
+                if (prefersReducedMotion) {
+                    drawStatic();
+                }
+            }
+
+            let pulseCounter = 0;
+
+            function render(timestamp) {
+                if (!lastTime) lastTime = timestamp;
+                const rawDt = (timestamp - lastTime) / 1000;
+                const dt = Math.min(Math.max(rawDt, 0.001), 0.064);
+                lastTime = timestamp;
+                const timeScale = dt * 60;
+
+                ctx.clearRect(0, 0, width, height);
+
+                for (let i = 0; i < nodes.length; i++) nodes[i].connectionsCount = 0;
+
+                // Update Nodes & Pointer Repulsion
+                for (let i = 0; i < nodes.length; i++) {
+                    const node = nodes[i];
+
+                    if (mouse.active && hasHover) {
+                        const dx = node.x - mouse.x;
+                        const dy = node.y - mouse.y;
+                        const distSq = dx * dx + dy * dy;
+
+                        if (distSq > 0 && distSq < REPULSION_DIST_SQ) {
+                            const dist = Math.sqrt(distSq);
+                            const force = (REPULSION_DIST - dist) / REPULSION_DIST;
+                            const pushX = (dx / dist) * force * 1.5;
+                            const pushY = (dy / dist) * force * 1.5;
+
+                            node.vx = node.vx * 0.9 + pushX * 0.1;
+                            node.vy = node.vy * 0.9 + pushY * 0.1;
+                        }
+                    }
+
+                    node.vx += (node.baseVx - node.vx) * 0.02 * timeScale;
+                    node.vy += (node.baseVy - node.vy) * 0.02 * timeScale;
+
+                    node.x += node.vx * timeScale;
+                    node.y += node.vy * timeScale;
+
+                    if (node.x < 0) { node.x = 0; node.vx *= -1; node.baseVx *= -1; }
+                    else if (node.x > width) { node.x = width; node.vx *= -1; node.baseVx *= -1; }
+
+                    if (node.y < 0) { node.y = 0; node.vy *= -1; node.baseVy *= -1; }
+                    else if (node.y > height) { node.y = height; node.vy *= -1; node.baseVy *= -1; }
+                }
+
+                const activeConnections = [];
+
+                // Connections
+                for (let i = 0; i < nodes.length; i++) {
+                    const nodeA = nodes[i];
+                    if (nodeA.connectionsCount >= MAX_CONNECTIONS_PER_NODE) continue;
+
+                    for (let j = i + 1; j < nodes.length; j++) {
+                        const nodeB = nodes[j];
+                        if (nodeB.connectionsCount >= MAX_CONNECTIONS_PER_NODE) continue;
+
+                        const dx = nodeB.x - nodeA.x;
+                        const dy = nodeB.y - nodeA.y;
+                        const distSq = dx * dx + dy * dy;
+
+                        if (distSq < MAX_CONN_DIST_SQ) {
+                            const alpha = (1 - distSq / MAX_CONN_DIST_SQ) * 0.16;
+                            ctx.strokeStyle = `rgba(212, 175, 55, ${alpha.toFixed(3)})`;
+                            ctx.lineWidth = 0.8;
+                            ctx.beginPath();
+                            ctx.moveTo(nodeA.x, nodeA.y);
+                            ctx.lineTo(nodeB.x, nodeB.y);
+                            ctx.stroke();
+
+                            nodeA.connectionsCount++;
+                            nodeB.connectionsCount++;
+                            activeConnections.push([i, j]);
+                        }
+                    }
+                }
+
+                // Draw Node Dots
+                for (let i = 0; i < nodes.length; i++) {
+                    const node = nodes[i];
+                    ctx.fillStyle = `rgba(212, 175, 55, ${node.opacity.toFixed(2)})`;
+                    ctx.beginPath();
+                    ctx.arc(node.x, node.y, node.radius, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+
+                // Pulses along connections
+                pulseCounter++;
+                if (pulseCounter > 120 && pulses.length < MAX_PULSES && activeConnections.length > 0) {
+                    pulseCounter = 0;
+                    const randomConn = activeConnections[Math.floor(Math.random() * activeConnections.length)];
+                    pulses.push({
+                        fromIndex: randomConn[0],
+                        toIndex: randomConn[1],
+                        progress: 0,
+                        speed: 0.008 + Math.random() * 0.006
+                    });
+                }
+
+                for (let p = pulses.length - 1; p >= 0; p--) {
+                    const pulse = pulses[p];
+                    pulse.progress += pulse.speed * timeScale;
+                    if (pulse.progress >= 1) {
+                        pulses.splice(p, 1);
+                        continue;
+                    }
+                    const nodeA = nodes[pulse.fromIndex];
+                    const nodeB = nodes[pulse.toIndex];
+                    if (nodeA && nodeB) {
+                        const px = nodeA.x + (nodeB.x - nodeA.x) * pulse.progress;
+                        const py = nodeA.y + (nodeB.y - nodeA.y) * pulse.progress;
+                        const pulseAlpha = Math.sin(pulse.progress * Math.PI) * 0.45;
+
+                        ctx.fillStyle = `rgba(243, 229, 171, ${pulseAlpha.toFixed(3)})`;
+                        ctx.beginPath();
+                        ctx.arc(px, py, 1.8, 0, Math.PI * 2);
+                        ctx.fill();
+                    }
+                }
+
+                animId = requestAnimationFrame(render);
+            }
+
+            function startLoop() {
+                if (animId !== null || prefersReducedMotion || !isIntersecting || !isDocumentVisible) return;
+                lastTime = performance.now();
+                animId = requestAnimationFrame(render);
+            }
+
+            function stopLoop() {
+                if (animId !== null) {
+                    cancelAnimationFrame(animId);
+                    animId = null;
+                }
+            }
+
+            // Listeners
+            heroSection.addEventListener("pointermove", (e) => {
+                if (!hasHover || prefersReducedMotion) return;
+                const rect = heroSection.getBoundingClientRect();
+                mouse.x = e.clientX - rect.left;
+                mouse.y = e.clientY - rect.top;
+                mouse.active = true;
+            }, { passive: true });
+
+            heroSection.addEventListener("pointerleave", () => {
+                mouse.active = false;
+                mouse.x = -9999;
+                mouse.y = -9999;
+            }, { passive: true });
+
+            const resizeObserver = new ResizeObserver(handleResize);
+            resizeObserver.observe(heroSection);
+
+            const intersectionObserver = new IntersectionObserver((entries) => {
+                isIntersecting = entries[0]?.isIntersecting ?? true;
+                if (isIntersecting) startLoop();
+                else stopLoop();
+            }, { threshold: 0.05 });
+            intersectionObserver.observe(heroSection);
+
+            document.addEventListener("visibilitychange", () => {
+                isDocumentVisible = !document.hidden;
+                if (isDocumentVisible) startLoop();
+                else stopLoop();
+            });
+
+            handleResize();
+            if (!prefersReducedMotion) {
+                startLoop();
+            }
+        })();
     </script>
 </body>
 </html>
