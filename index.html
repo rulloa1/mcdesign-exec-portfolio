@@ -1,0 +1,1066 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Executive Leadership | Construction Operations</title>
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            dark: '#0a0a0a',
+                            gold: '#D4AF37',
+                            light: '#f8f8f8',
+                            gray: '#a3a3a3'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        serif: ['Playfair Display', 'serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <!-- GSAP -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    
+    <style>
+        body {
+            background-color: #0a0a0a;
+            color: #f8f8f8;
+            overflow-x: hidden;
+        }
+        
+        .glass-panel {
+            background: linear-gradient(135deg, rgba(10,10,10,0.85) 0%, rgba(10,10,10,0.6) 100%);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(212, 175, 55, 0.15);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
+        }
+        
+        .btn-primary {
+            background-color: #D4AF37;
+            color: #0a0a0a;
+            padding: 0.75rem 1.5rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            display: inline-block;
+            border: 1px solid #D4AF37;
+        }
+        .btn-primary:hover, .btn-primary:focus {
+            background-color: transparent;
+            color: #D4AF37;
+        }
+        
+        .btn-secondary {
+            background-color: transparent;
+            color: #D4AF37;
+            padding: 0.75rem 1.5rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            display: inline-block;
+            border: 1px solid rgba(212, 175, 55, 0.3);
+        }
+        .btn-secondary:hover, .btn-secondary:focus {
+            border-color: #D4AF37;
+            background-color: rgba(212, 175, 55, 0.05);
+        }
+        
+        /* Canvas Section */
+        #sequence-container {
+            position: relative;
+            width: 100%;
+            height: 500vh; /* 4 viewport heights of scrolling + 1 viewport height base */
+        }
+        
+        .canvas-sticky-wrap {
+            position: sticky;
+            top: 0;
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+        }
+        
+        #hero-canvas {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            /* Ensures cover behavior via JS drawing, but this helps fallback rendering */
+        }
+        
+        .canvas-overlay-ui {
+            position: absolute;
+            inset: 0;
+            z-index: 10;
+            pointer-events: none; /* Let clicks pass to canvas if needed, though active overlays override this */
+        }
+        
+        .seq-overlay {
+            position: absolute;
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+            transition: opacity 0.1s;
+        }
+        
+        .seq-overlay.active {
+            visibility: visible;
+            pointer-events: auto; /* Active overlay catches clicks */
+        }
+
+        /* Nav */
+        nav {
+            transition: background-color 0.3s ease, border-color 0.3s ease;
+        }
+        nav.scrolled {
+            background-color: rgba(10, 10, 10, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(212, 175, 55, 0.1);
+        }
+
+        /* Accessibility/Reduced Motion */
+        @media (prefers-reduced-motion: reduce) {
+            #sequence-container {
+                height: 100vh;
+            }
+            .canvas-sticky-wrap {
+                position: relative;
+            }
+            .seq-overlay {
+                position: absolute !important;
+                opacity: 1 !important;
+                visibility: visible !important;
+                pointer-events: auto !important;
+                transform: none !important;
+                display: none;
+            }
+            #overlay-1 { display: flex; } /* Only show first overlay in reduced motion */
+            * { transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- NAVIGATION -->
+    <nav class="fixed w-full z-50 top-0 px-6 py-4 flex justify-between items-center" id="main-nav">
+        <a href="#" class="font-serif text-xl text-brand-gold tracking-wider" aria-label="mcdesign.bio home">mcdesign.bio</a>
+        
+        <!-- Desktop Nav -->
+        <div class="hidden md:flex items-center space-x-8 text-sm font-medium text-brand-light">
+            <a href="#profile" class="hover:text-brand-gold transition-colors">Profile</a>
+            <a href="#experience" class="hover:text-brand-gold transition-colors">Experience</a>
+            <a href="#projects" class="hover:text-brand-gold transition-colors">Projects</a>
+            <a href="#contact" class="hover:text-brand-gold transition-colors">Contact</a>
+            <a href="#" id="nav-resume-link" class="btn-primary py-2 px-4 text-xs tracking-wider uppercase">View Resume</a>
+        </div>
+        
+        <!-- Mobile Menu Button -->
+        <button class="md:hidden text-brand-gold" aria-label="Toggle menu" id="mobile-menu-btn">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="square" stroke-linejoin="miter" stroke-width="1.5" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+        </button>
+    </nav>
+    
+    <!-- Mobile Menu Overlay -->
+    <div id="mobile-menu" class="fixed inset-0 bg-brand-dark/95 backdrop-blur-md z-40 hidden flex-col justify-center items-center space-y-8 text-xl font-serif">
+        <a href="#profile" class="mobile-link text-brand-light hover:text-brand-gold">Profile</a>
+        <a href="#experience" class="mobile-link text-brand-light hover:text-brand-gold">Experience</a>
+        <a href="#projects" class="mobile-link text-brand-light hover:text-brand-gold">Projects</a>
+        <a href="#contact" class="mobile-link text-brand-light hover:text-brand-gold">Contact</a>
+        <a href="#" id="mobile-resume-link" class="mobile-link text-brand-gold border-b border-brand-gold pb-1">View Resume</a>
+    </div>
+
+    <!-- CANVAS SCROLL SEQUENCE -->
+    <section id="sequence-container" aria-label="Cinematic Portfolio Overview">
+        <div class="canvas-sticky-wrap">
+            <canvas id="hero-canvas" aria-hidden="true"></canvas>
+            
+            <!-- OVERLAYS -->
+            <div class="canvas-overlay-ui">
+                
+                <!-- Overlay 1: 0% Centered -->
+                <div id="overlay-1" class="seq-overlay flex flex-col items-center justify-center w-full h-full text-center px-4">
+                    <div class="glass-panel p-8 md:p-12 max-w-3xl border-t border-brand-gold/30">
+                        <p class="text-brand-gold text-xs md:text-sm font-semibold tracking-[0.2em] uppercase mb-4">CONSTRUCTION • OPERATIONS • EXECUTIVE LEADERSHIP</p>
+                        <h1 class="font-serif text-4xl md:text-6xl text-white mb-6 leading-tight">Strategic leadership.<br>Disciplined execution.</h1>
+                        <p class="text-brand-gray text-lg md:text-xl font-light mb-10 max-w-2xl mx-auto leading-relaxed">Explore my experience in construction operations, project delivery, and team leadership.</p>
+                        <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                            <a href="#experience" class="btn-primary">Explore Experience</a>
+                            <a href="#contact" class="btn-secondary">Get in Touch</a>
+                        </div>
+                    </div>
+                    <div class="absolute bottom-10 animate-bounce">
+                        <svg class="w-6 h-6 text-brand-gold" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path></svg>
+                    </div>
+                </div>
+
+                <!-- Overlay 2: 33% Bottom Left -->
+                <div id="overlay-2" class="seq-overlay flex items-end justify-start w-full h-full p-6 md:p-16">
+                    <div class="glass-panel p-6 md:p-10 max-w-lg border-l-2 border-brand-gold">
+                        <h2 class="font-serif text-3xl md:text-4xl text-white mb-4">From strategy to the field.</h2>
+                        <p class="text-brand-gray text-base md:text-lg font-light leading-relaxed">Connecting planning, people, and priorities.</p>
+                    </div>
+                </div>
+
+                <!-- Overlay 3: 66% Bottom Right -->
+                <div id="overlay-3" class="seq-overlay flex items-end justify-end w-full h-full p-6 md:p-16">
+                    <div class="glass-panel p-6 md:p-10 max-w-lg border-r-2 border-brand-gold text-right">
+                        <h2 class="font-serif text-3xl md:text-4xl text-white mb-4">Clarity across operations.</h2>
+                        <p class="text-brand-gray text-base md:text-lg font-light leading-relaxed">Coordination. Accountability. Purposeful execution.</p>
+                    </div>
+                </div>
+
+                <!-- Overlay 4: 90% Centered -->
+                <div id="overlay-4" class="seq-overlay flex flex-col items-center justify-center w-full h-full text-center px-4">
+                    <div class="glass-panel p-8 md:p-12 max-w-3xl border-b border-brand-gold/30">
+                        <h2 class="font-serif text-4xl md:text-5xl text-white mb-6">Let's discuss what's next.</h2>
+                        <p class="text-brand-gray text-lg md:text-xl font-light mb-10 max-w-2xl mx-auto leading-relaxed">Connect about construction operations and executive leadership opportunities.</p>
+                        <div class="flex flex-col sm:flex-row gap-4 justify-center items-center">
+                            <a href="#contact" class="btn-primary">Contact Me</a>
+                            <a href="#experience" class="text-brand-gold hover:text-white transition-colors border-b border-transparent hover:border-white pb-1">View Experience</a>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- NORMAL CONTENT BELOW THE EXPERIENCE -->
+    <main class="relative bg-brand-dark z-20">
+        
+        <!-- 1. Executive Profile -->
+        <section id="profile" class="py-24 px-6 max-w-6xl mx-auto border-t border-brand-gold/20">
+            <div class="grid grid-cols-1 md:grid-cols-12 gap-12">
+                <div class="md:col-span-5">
+                    <h2 class="font-serif text-4xl md:text-5xl text-brand-gold mb-6 leading-tight">Leadership grounded in execution.</h2>
+                </div>
+                <div class="md:col-span-7">
+                    <!-- EDITABLE PLACEHOLDER -->
+                    <p class="text-brand-gray text-lg leading-relaxed mb-10 font-light" id="profile-bio">With over 20 years of executive construction leadership, Michael Chandler has managed and delivered more than $500 million in ultra-luxury residential, hospitality, and civil projects across six global regions. Known for his old-world craftsmanship standards and modern execution methodology, Michael personally curates every trade partner, material selection, and milestone — ensuring on-time, on-budget delivery without compromising design intent.</p>
+                    
+                    <h3 class="text-white text-sm tracking-[0.2em] uppercase mb-6 border-b border-white/10 pb-2">Verified Capabilities</h3>
+                    <div class="flex flex-wrap gap-3">
+                        <span class="px-4 py-2 border border-brand-gold/30 text-brand-light text-sm bg-brand-gold/5">Operations Strategy</span>
+                        <span class="px-4 py-2 border border-brand-gold/30 text-brand-light text-sm bg-brand-gold/5">Construction Oversight</span>
+                        <span class="px-4 py-2 border border-brand-gold/30 text-brand-light text-sm bg-brand-gold/5">Project Delivery</span>
+                        <span class="px-4 py-2 border border-brand-gold/30 text-brand-light text-sm bg-brand-gold/5">Team Leadership</span>
+                        <span class="px-4 py-2 border border-brand-gold/30 text-brand-light text-sm bg-brand-gold/5">Process Improvement</span>
+                        <span class="px-4 py-2 border border-brand-gold/30 text-brand-light text-sm bg-brand-gold/5">Cross-Functional Coordination</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 2. Professional Experience -->
+        <section id="experience" class="py-24 px-6 bg-[#0f0f0f]">
+            <div class="max-w-4xl mx-auto">
+                <h2 class="font-serif text-3xl md:text-4xl text-white mb-16 text-center">Professional Experience</h2>
+                
+                <div class="space-y-16" id="experience-container">
+                    <!-- EDITABLE PLACEHOLDERS GENERATED BY JS -->
+                </div>
+            </div>
+        </section>
+
+        <!-- 3. Selected Projects & Operational Highlights -->
+        <section id="projects" class="py-24 px-6 max-w-7xl mx-auto">
+            <h2 class="font-serif text-3xl md:text-4xl text-white mb-4 text-center">Selected Projects</h2>
+            <p class="text-brand-gray text-center mb-16 max-w-2xl mx-auto font-light">Operational highlights and project delivery records.</p>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8" id="projects-container">
+                <!-- EDITABLE PLACEHOLDERS GENERATED BY JS -->
+            </div>
+        </section>
+
+        <!-- 4. Leadership Approach -->
+        <section class="py-24 px-6 bg-[#0f0f0f] border-y border-brand-gold/10">
+            <div class="max-w-6xl mx-auto text-center">
+                <h2 class="font-serif text-3xl md:text-4xl text-white mb-16">Leadership Approach</h2>
+                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8">
+                    <div class="p-6 glass-panel">
+                        <h4 class="text-brand-gold font-serif text-xl mb-3">Alignment</h4>
+                        <p class="text-brand-gray text-sm leading-relaxed">Aligning multinational teams, architects, and high-net-worth stakeholders around shared schedules and uncompromising quality expectations.</p>
+                    </div>
+                    <div class="p-6 glass-panel">
+                        <h4 class="text-brand-gold font-serif text-xl mb-3">Connection</h4>
+                        <p class="text-brand-gray text-sm leading-relaxed">Serving as the primary executive liaison connecting architectural design intent with field execution and rigorous P&L stewardship.</p>
+                    </div>
+                    <div class="p-6 glass-panel">
+                        <h4 class="text-brand-gold font-serif text-xl mb-3">Ownership</h4>
+                        <p class="text-brand-gray text-sm leading-relaxed">A single point of accountability holding every phase—from permitting to final inspection—to a consistent standard across dispersed sites.</p>
+                    </div>
+                    <div class="p-6 glass-panel">
+                        <h4 class="text-brand-gold font-serif text-xl mb-3">Resolution</h4>
+                        <p class="text-brand-gray text-sm leading-relaxed">Standardizing workflows, navigating complex compliance regulations, and proactively mitigating risks to pull project schedules forward.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 6. Contact & 5. Resume (Combined) -->
+        <section id="contact" class="py-32 px-6 max-w-4xl mx-auto text-center">
+            <h2 class="font-serif text-4xl md:text-5xl text-white mb-6">Let's discuss your next leadership opportunity.</h2>
+            <p class="text-brand-gray text-lg mb-12 max-w-2xl mx-auto font-light">Available for project inquiries, speaking engagements, and board consultations. Professional references and detailed project portfolio available upon request.</p>
+            
+            <div class="flex flex-col sm:flex-row gap-6 justify-center items-center">
+                <a href="#" id="contact-email-btn" class="btn-primary text-lg w-full sm:w-auto">Contact Placeholder</a>
+                <a href="#" id="contact-linkedin-btn" class="btn-secondary text-lg w-full sm:w-auto hidden">LinkedIn</a>
+            </div>
+            
+            <div class="mt-16 pt-16 border-t border-brand-gold/10">
+                <h3 class="text-white font-serif text-2xl mb-6">Complete Professional History</h3>
+                <div id="resume-container">
+                    <span class="text-brand-gray italic">Resume coming soon.</span>
+                </div>
+            </div>
+        </section>
+        
+    </main>
+
+    <!-- 7. Footer -->
+    <footer class="bg-black py-8 border-t border-brand-gold/20 text-center">
+        <div class="flex flex-col items-center justify-center space-y-4">
+            <a href="#" class="font-serif text-brand-gold text-lg tracking-wider" onclick="window.scrollTo({top: 0, behavior: 'smooth'}); return false;">mcdesign.bio</a>
+            <p class="text-brand-gray text-sm" id="copyright-year">© 2026 mcdesign.bio. All rights reserved.</p>
+            <a href="#" class="text-brand-gray text-xs hover:text-white transition-colors uppercase tracking-widest mt-4 block" onclick="window.scrollTo({top: 0, behavior: 'smooth'}); return false;">Back to Top ↑</a>
+        </div>
+    </footer>
+
+    <!-- JAVASCRIPT CONFIGURATION & LOGIC -->
+    <script>
+        // =====================================================================
+        // CONFIGURATION BLOCK
+        // =====================================================================
+                const CONFIG = {
+            // SEQUENCE SETTINGS
+            FRAME_COUNT: 120,
+            FRAME_PATH: (index) => `./frames/frame_${String(index).padStart(4, '0')}.jpg`, 
+            PLACEHOLDER_MODE: false,
+            PLACEHOLDER_URL: 'https://mcdesign.bio/__l5e/assets-v1/media/image_1790923277003.png', 
+            
+            // CONTACT & RESUME
+            CONTACT_EMAIL: 'mike.rcccon@yahoo.com', 
+            RESUME_URL: 'https://mcdesign.bio/resume', 
+            LINKEDIN_URL: 'https://www.linkedin.com/in/michael-chandler-3858a63a',
+            
+            // PROJECTS DATA
+            PROJECTS: [
+                {
+                                "title": "S. Florida High Rise Luxe",
+                                "sector": "S. Florida",
+                                "role": "Design (Co-Design of Structure / Int. Design by Others), Project Management, Owner Representative, Craftsmen-Contractor / Contract Coordination, Property Management",
+                                "scope": "4,200 sqft \u2022 5 months \u2022 4 bed \u00b7 4 bath",
+                                "contribution": "Professional execution and project oversight.",
+                                "outcome": "Completed to high executive standards.",
+                                "image": "https://mcdesign.bio/__l5e/assets-v1/d001ed49-0dab-46d2-aa4b-41a1506b0e16/miami-beach-sunset-pool.png",
+                                "link": "https://mcdesign.bio/projects/miami-beach"
+                            },
+                {
+                                "title": "High Alpine Mtn. Ranch",
+                                "sector": "Montana",
+                                "role": "Owner Representation, Design Oversight, Contractor Procurement, Contract Negotiation, Project Management, Property Management",
+                                "scope": "2,300 sqft \u2022 24 months \u2022 2 bed \u00b7 2 bath",
+                                "contribution": "Professional execution and project oversight.",
+                                "outcome": "Completed to high executive standards.",
+                                "image": "https://mcdesign.bio/__l5e/assets-v1/30cbe81c-83c3-42ed-a206-bf06cd99c179/alpine-ranch-cover-pro.png",
+                                "link": "https://mcdesign.bio/projects/alpine-ranch"
+                            },
+                {
+                                "title": "Syracuse House",
+                                "sector": "N. Utah",
+                                "role": "Owner Representation, Project Management, Property Management",
+                                "scope": "6,200 sqft \u2022 18 months",
+                                "contribution": "Professional execution and project oversight.",
+                                "outcome": "Completed to high executive standards.",
+                                "image": "./assets/syracuse-cover.webp",
+                                "link": "https://mcdesign.bio/projects/syracuse"
+                            },
+                {
+                                "title": "Mtn. Mid-Rise Luxe Condo",
+                                "sector": "Montana",
+                                "role": "Owner Representation, Project Management, Property Management",
+                                "scope": "2,800 sqft \u2022 8 months \u2022 New Build",
+                                "contribution": "Professional execution and project oversight.",
+                                "outcome": "Completed to high executive standards.",
+                                "image": "./assets/montana-condo-cover.webp",
+                                "link": "https://mcdesign.bio/projects/montana-condo"
+                            },
+                {
+                                "title": "Ultra Luxe Private Club",
+                                "sector": "SE Texas",
+                                "role": "Owner Representation, Daily Project Management, Co-Design of Many Elements, Property Management",
+                                "scope": "189,000 Gallon \u2022 18 months",
+                                "contribution": "Professional execution and project oversight.",
+                                "outcome": "Completed to high executive standards.",
+                                "image": "./assets/hospitality-pool-cover.webp",
+                                "link": "https://mcdesign.bio/projects/hospitality-pool"
+                            },
+                {
+                                "title": "South Coast Renovation",
+                                "sector": "Big Sur, CA",
+                                "role": "Owner Representative, Designer, Int. Designer, Builder, Project Manager, Property Manager, Owner Designee \u2014 During Photo Ad Campaign and Cinema Movie Shoots",
+                                "scope": "3,800 sqft \u2022 16 months",
+                                "contribution": "Professional execution and project oversight.",
+                                "outcome": "Completed to high executive standards.",
+                                "image": "https://mcdesign.bio/__l5e/assets-v1/17e606d1-cd0e-431a-a775-25a40c4e13b8/southcoast-cover-pro.png",
+                                "link": "https://mcdesign.bio/projects/southcoast"
+                            },
+                {
+                                "title": "Carmel Valley New",
+                                "sector": "Carmel Valley, CA",
+                                "role": "Designer (Structure), Builder, Project Manager, Civil Engineering Contractor",
+                                "scope": "4,800 sqft \u2022 20 months",
+                                "contribution": "Professional execution and project oversight.",
+                                "outcome": "Completed to high executive standards.",
+                                "image": "./assets/carmel-valley-new-cover.webp",
+                                "link": "https://mcdesign.bio/projects/carmel-valley-new"
+                            },
+                {
+                                "title": "North Florida Renovation Addition",
+                                "sector": "N. Florida",
+                                "role": "Designer (Manage/Oversight of Architect / Int. Design by Others), Project Management, Owner Representative, Craftsmen-Contractor / Contract Coordination, Property Management",
+                                "scope": "3,600 + 1,200 sqft \u2022 10 months",
+                                "contribution": "Professional execution and project oversight.",
+                                "outcome": "Completed to high executive standards.",
+                                "image": "https://mcdesign.bio/__l5e/assets-v1/4352792a-8630-4b16-a842-e7dbd6d0fe23/north-florida-vero-cover.png",
+                                "link": "https://mcdesign.bio/projects/north-florida"
+                            },
+                {
+                                "title": "Coastal Mountain Residential",
+                                "sector": "Big Sur, CA",
+                                "role": "Owner Representative, Designer, Builder, Project Manager, Permit Procurement",
+                                "scope": "11 months \u2022 3,000 cu yds earth moved \u2022 320 ln ft retaining walls",
+                                "contribution": "Professional execution and project oversight.",
+                                "outcome": "Completed to high executive standards.",
+                                "image": "./assets/bigsur-civil-cover.webp",
+                                "link": "https://mcdesign.bio/projects/bigsur-civil"
+                            },
+                {
+                                "title": "Carmel Knolls",
+                                "sector": "Carmel, CA",
+                                "role": "Designer, Int. Designer, Builder, Project Manager, Permit Procurement",
+                                "scope": "2,200 sqft \u2022 1,400 sqft decking \u2022 12 months",
+                                "contribution": "Professional execution and project oversight.",
+                                "outcome": "Completed to high executive standards.",
+                                "image": "./assets/carmel-knolls-cover.webp",
+                                "link": "https://mcdesign.bio/projects/carmel-knolls"
+                            },
+                {
+                                "title": "Coastal Restoration",
+                                "sector": "Monterey Peninsula, CA",
+                                "role": "Civil Engineering Contractor, Builder, Permit Procurement (Emergency Construction Permit to save residence)",
+                                "scope": "9 months \u2022 2,500 cu yds earth moved \u2022 180 ln ft retaining walls",
+                                "contribution": "Professional execution and project oversight.",
+                                "outcome": "Completed to high executive standards.",
+                                "image": "https://mcdesign.bio/__l5e/assets-v1/f7c1f307-4319-4079-ae75-dc6cc46936c5/coastal-restoration-deck-cover.png",
+                                "link": "https://mcdesign.bio/projects/coastal-restoration"
+                            },
+                {
+                                "title": "Abaco Luxe Boat House",
+                                "sector": "Abaco, Bahamas",
+                                "role": "Project Manager in a Foreign Country for US Owners",
+                                "scope": "1,800 sqft \u2022 6 months",
+                                "contribution": "Professional execution and project oversight.",
+                                "outcome": "Completed to high executive standards.",
+                                "image": "./assets/abaco-luxe-boathouse-cover.webp",
+                                "link": "https://mcdesign.bio/projects/abaco-boathouse"
+                            },
+                {
+                                "title": "Civil Engineering",
+                                "sector": "CA \u00b7 TX \u00b7 NM \u00b7 CO \u00b7 MT",
+                                "role": "Civil Engineering Contractor/Builder, Project Management, Permit Procurement",
+                                "scope": "2015\u20132024 \u2022 50,000 cu yds earth moved \u2022 2,500 ln ft retaining walls",
+                                "contribution": "Professional execution and project oversight.",
+                                "outcome": "Completed to high executive standards.",
+                                "image": "https://mcdesign.bio/projects/assets/development-site.webp",
+                                "link": "https://mcdesign.bio/projects/civil-infrastructure"
+                            },
+                {
+                                "title": "Beachfront Estate Residence",
+                                "sector": "Abaco, Bahamas",
+                                "role": "Project Manager in Foreign Country for US Owners",
+                                "scope": "6,800 sqft \u2022 2.5 Acres \u2022 180 ft beach frontage",
+                                "contribution": "Professional execution and project oversight.",
+                                "outcome": "Completed to high executive standards.",
+                                "image": "./assets/beachfront-cover.webp",
+                                "link": "https://mcdesign.bio/projects/beachfront-estate"
+                            },
+                {
+                                "title": "Development Civil",
+                                "sector": "SE Texas",
+                                "role": "Project Management, Development / Civil Engineering Contractor/Builder",
+                                "scope": "103 Acres \u2022 36 months",
+                                "contribution": "Professional execution and project oversight.",
+                                "outcome": "Completed to high executive standards.",
+                                "image": "./assets/development-civil-cover.jpg",
+                                "link": "https://mcdesign.bio/projects/development-civil"
+                            },
+                {
+                                "title": "New Residential in Historic Neighborhood",
+                                "sector": "Central Coast, CA",
+                                "role": "Designer (Structure & Int. Design), Project Management, Owner Representative",
+                                "scope": "2,600 sqft \u2022 14 months",
+                                "contribution": "Professional execution and project oversight.",
+                                "outcome": "Completed to high executive standards.",
+                                "image": "./assets/pacific-grove-cover.webp",
+                                "link": "https://mcdesign.bio/projects/pacific-grove"
+                            },
+                {
+                                "title": "Carmel Forest to Ocean View",
+                                "sector": "Carmel By the Sea, CA",
+                                "role": "Designer, Builder, Project Manager",
+                                "scope": "Custom Addition \u2022 Forest to Ocean Views",
+                                "contribution": "Professional execution and project oversight.",
+                                "outcome": "Completed to high executive standards.",
+                                "image": "./assets/carmel-forest-cover.webp",
+                                "link": "https://mcdesign.bio/projects/carmel-forest"
+                            },
+                {
+                                "title": "Hillside Restoration & Environmental Cleanup",
+                                "sector": "Carmel, CA",
+                                "role": "Civil Engineering Contractor/Builder, Permit Procurement",
+                                "scope": "4 months \u2022 1.5 Acres \u2022 80 Tons debris removed",
+                                "contribution": "Professional execution and project oversight.",
+                                "outcome": "Completed to high executive standards.",
+                                "image": "./assets/hillside-restoration-cover.webp",
+                                "link": "https://mcdesign.bio/projects/hillside-restoration"
+                            },
+                {
+                                "title": "Laguna Grande",
+                                "sector": "Seaside, CA",
+                                "role": "Design (Structure), Builder, Project Manager, Owner's Representative, Civil Engineering Construction",
+                                "scope": "12,000 sqft \u2022 14 months",
+                                "contribution": "Professional execution and project oversight.",
+                                "outcome": "Completed to high executive standards.",
+                                "image": "./assets/laguna-grande-cover.webp",
+                                "link": "https://mcdesign.bio/projects/laguna-grande"
+                            }
+],
+
+
+            
+            // EXPERIENCE DATA
+            EXPERIENCE: [
+                {
+                                "employer": "The Mangrove Group (Private Consulting)",
+                                "role": "CEO & Head of Operations (Contract)",
+                                "dates": "May 2026 \u2013 Aug 2026",
+                                "responsibilities": [
+                                                "Led company operations on a contract basis, reporting directly to ownership and setting priorities across the active construction portfolio.",
+                                                "Standardized procurement, scheduling, and project reporting workflows to give ownership clearer cost visibility and faster decisions."
+                                ],
+                                "achievements": [
+                                                "Held project teams accountable for budget, schedule, and quality through consistent cost reporting and executive-level project reviews.",
+                                                "Led and mentored project managers, superintendents, and field staff, tightening accountability between office and field."
+                                ]
+                            },
+                {
+                                "employer": "NewQuest Properties",
+                                "role": "Sr. Project Manager / Owner's Representative",
+                                "dates": "2022 \u2013 2025",
+                                "responsibilities": [
+                                                "Oversaw design and construction of club renovations and new facilities, applying architectural expertise to protect design intent.",
+                                                "Served as primary executive liaison between the design team, the field, high-net-worth developers, and institutional stakeholders."
+                                ],
+                                "achievements": [
+                                                "Directed construction phases of a $67MM private club portfolio, holding to multi-year budget and schedule requirements.",
+                                                "Built localized procurement frameworks that cut material lead times by 15% during post-pandemic supply chain disruption."
+                                ]
+                            },
+                {
+                                "employer": "The Mangrove Group",
+                                "role": "Project Manager / Owner's Representative",
+                                "dates": "2020 \u2013 2022",
+                                "responsibilities": [
+                                                "Standardized permitting and entitlement workflows across international jurisdictions (Bahamas, Mexico).",
+                                                "Aligned multilingual, culturally diverse project teams around shared schedules and quality expectations."
+                                ],
+                                "achievements": [
+                                                "Directed a $75M pipeline of five large private residential estates in the U.S. and abroad, delivering every project within \u00b12% of budget.",
+                                                "Managed every phase from permitting to final inspection, holding a consistent quality standard across geographically dispersed sites."
+                                ]
+                            },
+                {
+                                "employer": "Yellowstone Club",
+                                "role": "Project Manager",
+                                "dates": "2018 \u2013 2020",
+                                "responsibilities": [
+                                                "Managed stakeholder communication to align project goals with the exacting expectations of an ultra-exclusive membership.",
+                                                "Ran permit and entitlement processes under complex mountain-resort and environmental regulations."
+                                ],
+                                "achievements": [
+                                                "Led construction oversight for multimillion-dollar luxury condominium towers, spa facilities, and restaurants in North America's premier private ski and golf community."
+                                ]
+                            },
+                {
+                                "employer": "Discovery Land Company / Starfish Company",
+                                "role": "Project Manager \u2014 Bakers Bay Resort",
+                                "dates": "2015 \u2013 2018",
+                                "responsibilities": [
+                                                "Ran procurement and logistics for remote-island construction with limited local infrastructure.",
+                                                "Used native-level Spanish to lead and communicate with an international workforce."
+                                ],
+                                "achievements": [
+                                                "Directed construction of Owner, Resort, and Private products, including the Beach Club Restaurant, Beach Club Spa, Market by the Pier, and multiple ultra-luxury single-family residences."
+                                ]
+                            }
+]
+        };
+
+        // =====================================================================
+        // INITIALIZATION & POPULATION
+        // =====================================================================
+        document.addEventListener('DOMContentLoaded', () => {
+            
+            // Set Copyright Year
+            document.getElementById('copyright-year').innerText = `© ${new Date().getFullYear()} mcdesign.bio. All rights reserved.`;
+
+            // Populate Contact
+            const emailBtn = document.getElementById('contact-email-btn');
+            if (CONFIG.CONTACT_EMAIL && CONFIG.CONTACT_EMAIL !== 'editable@example.com') {
+                emailBtn.href = `mailto:${CONFIG.CONTACT_EMAIL}`;
+                emailBtn.innerText = 'Email Me';
+            } else {
+                emailBtn.href = '#';
+                emailBtn.innerText = '[CONFIG: Set Email]';
+            }
+
+            const linkedinBtn = document.getElementById('contact-linkedin-btn');
+            if (CONFIG.LINKEDIN_URL) {
+                linkedinBtn.href = CONFIG.LINKEDIN_URL;
+                linkedinBtn.classList.remove('hidden');
+                linkedinBtn.target = '_blank';
+            }
+
+            // Populate Resume
+            const resumeContainer = document.getElementById('resume-container');
+            const navResumeLink = document.getElementById('nav-resume-link');
+            const mobileResumeLink = document.getElementById('mobile-resume-link');
+            
+            if (CONFIG.RESUME_URL) {
+                const btnHtml = `<a href="${CONFIG.RESUME_URL}" target="_blank" class="btn-primary text-sm uppercase tracking-widest">Download Resume (PDF)</a>`;
+                resumeContainer.innerHTML = btnHtml;
+                navResumeLink.href = CONFIG.RESUME_URL;
+                navResumeLink.target = "_blank";
+                mobileResumeLink.href = CONFIG.RESUME_URL;
+                mobileResumeLink.target = "_blank";
+            } else {
+                navResumeLink.style.display = 'none';
+                mobileResumeLink.style.display = 'none';
+            }
+
+            // Populate Experience
+            const expContainer = document.getElementById('experience-container');
+            let expHtml = '';
+            CONFIG.EXPERIENCE.forEach((job) => {
+                const resps = job.responsibilities.map(r => `<li>${r}</li>`).join('');
+                const achs = job.achievements.map(a => `<li>${a}</li>`).join('');
+                expHtml += `
+                    <div class="relative pl-8 md:pl-0">
+                        <div class="hidden md:block absolute left-[50%] top-0 bottom-0 w-px bg-brand-gold/20 -translate-x-1/2"></div>
+                        <div class="md:grid md:grid-cols-2 md:gap-16 items-start relative">
+                            <div class="md:text-right mb-4 md:mb-0">
+                                <h3 class="text-brand-gold font-serif text-2xl">${job.role}</h3>
+                                <p class="text-white text-lg">${job.employer}</p>
+                                <p class="text-brand-gray/60 text-sm font-light tracking-wider uppercase mt-1">${job.dates}</p>
+                            </div>
+                            <div class="hidden md:block absolute left-[50%] top-2 w-3 h-3 bg-brand-dark border-2 border-brand-gold rounded-full -translate-x-1/2 z-10"></div>
+                            <div class="text-brand-gray text-sm font-light space-y-4">
+                                <ul class="list-disc list-inside space-y-1">${resps}</ul>
+                                ${achs ? `<h5 class="text-white uppercase tracking-widest text-xs mt-4 mb-2">Verified Outcomes</h5><ul class="list-disc list-inside space-y-1">${achs}</ul>` : ''}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            expContainer.innerHTML = expHtml;
+
+            // Populate Projects
+            const projContainer = document.getElementById('projects-container');
+            let projHtml = '';
+            CONFIG.PROJECTS.forEach(proj => {
+                const linkAttr = proj.link ? `href="${proj.link}" target="_blank"` : `class="cursor-not-allowed opacity-50" title="Link Unavailable"`;
+                projHtml += `
+                    <div class="flex flex-col bg-[#141414] border border-white/5 rounded-sm overflow-hidden group">
+                        <div class="h-48 md:h-64 overflow-hidden relative">
+                            <div class="absolute inset-0 bg-brand-dark/20 group-hover:bg-transparent transition-colors duration-500 z-10"></div>
+                            <img src="${proj.image}" alt="Conceptual rendering for ${proj.title}" class="w-full h-full object-cover grayscale opacity-80 group-hover:grayscale-0 group-hover:scale-105 transition-all duration-700 ease-out" loading="lazy">
+                        </div>
+                        <div class="p-6 flex flex-col flex-grow">
+                            <p class="text-brand-gold text-xs tracking-widest uppercase mb-2">${proj.sector}</p>
+                            <h3 class="text-white font-serif text-xl mb-4">${proj.title}</h3>
+                            <div class="space-y-3 text-sm text-brand-gray font-light mb-6 flex-grow">
+                                <p><strong class="text-white font-medium">Role:</strong> ${proj.role}</p>
+                                <p><strong class="text-white font-medium">Scope:</strong> ${proj.scope}</p>
+                                <p><strong class="text-white font-medium">Contribution:</strong> ${proj.contribution}</p>
+                                <p><strong class="text-white font-medium">Outcome:</strong> ${proj.outcome}</p>
+                            </div>
+                            <a ${linkAttr} class="text-brand-gold text-sm uppercase tracking-widest hover:text-white transition-colors border-b border-transparent hover:border-white self-start pb-1">
+                                ${proj.link ? 'View Project Details' : 'Details Unavailable'}
+                            </a>
+                        </div>
+                    </div>
+                `;
+            });
+            projContainer.innerHTML = projHtml;
+
+            // Mobile Menu Toggle
+            const btn = document.getElementById('mobile-menu-btn');
+            const menu = document.getElementById('mobile-menu');
+            const links = document.querySelectorAll('.mobile-link');
+            
+            btn.addEventListener('click', () => {
+                menu.classList.toggle('hidden');
+                menu.classList.toggle('flex');
+            });
+            links.forEach(l => l.addEventListener('click', () => {
+                menu.classList.add('hidden');
+                menu.classList.remove('flex');
+            }));
+
+            // Nav Scroll State
+            const nav = document.getElementById('main-nav');
+            window.addEventListener('scroll', () => {
+                if (window.scrollY > 50) {
+                    nav.classList.add('scrolled');
+                } else {
+                    nav.classList.remove('scrolled');
+                }
+            });
+        });
+
+        // =====================================================================
+        // CANVAS SEQUENCE LOGIC (GSAP SCROLLTRIGGER)
+        // =====================================================================
+        
+        // Register ScrollTrigger
+        gsap.registerPlugin(ScrollTrigger);
+
+        const canvas = document.getElementById("hero-canvas");
+        const context = canvas.getContext("2d");
+        
+        // Pre-loaded frames array
+        const images = [];
+        let framesLoaded = 0;
+        let lastDrawnIndex = -1;
+        let windowWidth = window.innerWidth;
+        let windowHeight = window.innerHeight;
+
+        // Overlay elements
+        const overlays = [
+            document.getElementById("overlay-1"),
+            document.getElementById("overlay-2"),
+            document.getElementById("overlay-3"),
+            document.getElementById("overlay-4")
+        ];
+
+        // Object holding the animation state (0 to 1 progress)
+        const sequence = {
+            progress: 0
+        };
+
+        // Resize Canvas with DPR support
+        function resizeCanvas() {
+            windowWidth = window.innerWidth;
+            windowHeight = window.innerHeight;
+            
+            const dpr = Math.min(window.devicePixelRatio || 1, 2); // Cap DPR at 2 for performance
+            
+            canvas.width = windowWidth * dpr;
+            canvas.height = windowHeight * dpr;
+            
+            context.scale(dpr, dpr);
+            
+            // Force redraw on resize
+            if (lastDrawnIndex !== -1) {
+                const forceIndex = lastDrawnIndex;
+                lastDrawnIndex = -1; 
+                renderFrame(forceIndex);
+            }
+        }
+        
+        window.addEventListener("resize", resizeCanvas);
+        resizeCanvas();
+
+        // Draw image covering the canvas (object-fit: cover logic)
+        function drawCoverImage(img) {
+            const canvasRatio = windowWidth / windowHeight;
+            const imgRatio = img.width / img.height;
+            
+            let drawWidth, drawHeight, offsetX, offsetY;
+
+            if (canvasRatio > imgRatio) {
+                drawWidth = windowWidth;
+                drawHeight = windowWidth / imgRatio;
+                offsetX = 0;
+                offsetY = (windowHeight - drawHeight) / 2;
+            } else {
+                drawWidth = windowHeight * imgRatio;
+                drawHeight = windowHeight;
+                offsetX = (windowWidth - drawWidth) / 2;
+                offsetY = 0;
+            }
+
+            // Clear and draw
+            context.clearRect(0, 0, windowWidth, windowHeight);
+            context.drawImage(img, offsetX, offsetY, drawWidth, drawHeight);
+        }
+
+        // Render specific frame index, falling back to closest loaded frame
+        function renderFrame(index) {
+            if (index === lastDrawnIndex) return; // Skip if already drawn
+            
+            // If strictly placeholder mode, always draw images[0] (which we loaded with PLACEHOLDER_URL)
+            if (CONFIG.PLACEHOLDER_MODE) {
+                if (images[0] && images[0].complete) {
+                    drawCoverImage(images[0]);
+                    lastDrawnIndex = index;
+                }
+                return;
+            }
+
+            // Sequence Mode: Find closest loaded frame
+            let bestImg = null;
+            
+            // Exact match
+            if (images[index] && images[index].complete) {
+                bestImg = images[index];
+            } else {
+                // Find nearest loaded frame
+                let dist = 1;
+                while (index - dist >= 0 || index + dist < CONFIG.FRAME_COUNT) {
+                    if (index - dist >= 0 && images[index - dist] && images[index - dist].complete) {
+                        bestImg = images[index - dist];
+                        break;
+                    }
+                    if (index + dist < CONFIG.FRAME_COUNT && images[index + dist] && images[index + dist].complete) {
+                        bestImg = images[index + dist];
+                        break;
+                    }
+                    dist++;
+                }
+            }
+
+            if (bestImg) {
+                drawCoverImage(bestImg);
+                lastDrawnIndex = index;
+            } else {
+                // Procedural fallback if absolutely nothing loaded
+                context.clearRect(0, 0, windowWidth, windowHeight);
+                context.fillStyle = "#0a0a0a";
+                context.fillRect(0, 0, windowWidth, windowHeight);
+                
+                // Add a muted gold tint
+                context.fillStyle = "rgba(212, 175, 55, 0.05)";
+                context.fillRect(0, 0, windowWidth, windowHeight);
+            }
+        }
+
+        // Preload frames logic
+        function loadFrames() {
+            if (CONFIG.PLACEHOLDER_MODE) {
+                const img = new Image();
+                img.onload = () => {
+                    framesLoaded++;
+                    renderFrame(0);
+                };
+                img.src = CONFIG.PLACEHOLDER_URL;
+                images[0] = img;
+                return;
+            }
+
+            // Bounded concurrency loading for full sequence
+            const concurrency = 10;
+            let currentLoadIndex = 0;
+
+            function loadNext() {
+                if (currentLoadIndex >= CONFIG.FRAME_COUNT) return;
+                
+                const idx = currentLoadIndex++;
+                const img = new Image();
+                img.onload = () => {
+                    framesLoaded++;
+                    // If this is the first frame loaded, render it immediately
+                    if (framesLoaded === 1) renderFrame(0);
+                    // Load the next one in the queue
+                    loadNext();
+                };
+                img.onerror = () => {
+                    // Skip failed frames, continue queue
+                    loadNext();
+                };
+                img.src = CONFIG.FRAME_PATH(idx + 1); // 1-indexed usually for filenames
+                images[idx] = img;
+            }
+
+            // Kick off initial concurrent workers
+            for (let i = 0; i < concurrency; i++) {
+                loadNext();
+            }
+        }
+
+        // Setup ScrollTrigger
+        function setupScrollTrigger() {
+            
+            // Check for reduced motion
+            const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+            if (prefersReducedMotion) {
+                // In reduced motion, we just load frame 0 and don't pin/scrub
+                loadFrames();
+                return;
+            }
+
+            // Master timeline for the pinned section
+            const tl = gsap.timeline({
+                scrollTrigger: {
+                    trigger: "#sequence-container",
+                    start: "top top",
+                    end: "+=400%", // Scroll distance = 4 viewports
+                    pin: ".canvas-sticky-wrap",
+                    scrub: 1, // Smooth scrub
+                    onUpdate: (self) => {
+                        sequence.progress = self.progress;
+                        
+                        // Map progress to frame index
+                        const frameIndex = Math.min(
+                            CONFIG.FRAME_COUNT - 1,
+                            Math.floor(sequence.progress * CONFIG.FRAME_COUNT)
+                        );
+                        
+                        renderFrame(frameIndex);
+                    }
+                }
+            });
+
+            // Overlay Transitions Timeline (Synced with scroll)
+            // 0% -> 33% -> 66% -> 90% mapping
+            
+            // 1. Initial State (Overlay 1 visible)
+            gsap.set(overlays[0], { opacity: 1, visibility: 'visible', pointerEvents: 'auto', y: 0 });
+            gsap.set(overlays.slice(1), { opacity: 0, visibility: 'hidden', pointerEvents: 'none', y: 30 });
+
+            // Ensure first frame handles active class correctly for A11y (ARIA hidden toggle logic via classes not needed if display handles it, but pointer-events works)
+            overlays.forEach((o, i) => {
+                if (i===0) { o.classList.add('active'); o.setAttribute('aria-hidden', 'false'); }
+                else { o.classList.remove('active'); o.setAttribute('aria-hidden', 'true'); }
+            });
+
+            // 2. Animate transitions during the scroll
+            
+            // Overlay 1 Fade Out (0 -> 20%)
+            tl.to(overlays[0], { 
+                opacity: 0, 
+                y: -30,
+                duration: 0.2, 
+                onStart: () => { overlays[0].classList.add('active'); overlays[0].setAttribute('aria-hidden', 'false'); },
+                onComplete: () => { overlays[0].classList.remove('active'); overlays[0].setAttribute('aria-hidden', 'true'); },
+                onReverseComplete: () => { overlays[0].classList.add('active'); overlays[0].setAttribute('aria-hidden', 'false'); }
+            }, 0);
+
+            // Overlay 2 Fade In/Out (25% -> 35% -> 55%)
+            tl.to(overlays[1], { 
+                opacity: 1, 
+                y: 0,
+                duration: 0.1,
+                onStart: () => { overlays[1].classList.remove('active'); overlays[1].setAttribute('aria-hidden', 'true'); },
+                onComplete: () => { overlays[1].classList.add('active'); overlays[1].setAttribute('aria-hidden', 'false'); },
+                onReverseComplete: () => { overlays[1].classList.remove('active'); overlays[1].setAttribute('aria-hidden', 'true'); }
+            }, 0.25)
+            .to(overlays[1], { 
+                opacity: 0, 
+                y: -30,
+                duration: 0.1,
+                onStart: () => { overlays[1].classList.add('active'); overlays[1].setAttribute('aria-hidden', 'false'); },
+                onComplete: () => { overlays[1].classList.remove('active'); overlays[1].setAttribute('aria-hidden', 'true'); },
+                onReverseComplete: () => { overlays[1].classList.add('active'); overlays[1].setAttribute('aria-hidden', 'false'); }
+            }, 0.45);
+
+            // Overlay 3 Fade In/Out (60% -> 70% -> 85%)
+            tl.to(overlays[2], { 
+                opacity: 1, 
+                y: 0,
+                duration: 0.1,
+                onStart: () => { overlays[2].classList.remove('active'); overlays[2].setAttribute('aria-hidden', 'true'); },
+                onComplete: () => { overlays[2].classList.add('active'); overlays[2].setAttribute('aria-hidden', 'false'); },
+                onReverseComplete: () => { overlays[2].classList.remove('active'); overlays[2].setAttribute('aria-hidden', 'true'); }
+            }, 0.55)
+            .to(overlays[2], { 
+                opacity: 0, 
+                y: -30,
+                duration: 0.1,
+                onStart: () => { overlays[2].classList.add('active'); overlays[2].setAttribute('aria-hidden', 'false'); },
+                onComplete: () => { overlays[2].classList.remove('active'); overlays[2].setAttribute('aria-hidden', 'true'); },
+                onReverseComplete: () => { overlays[2].classList.add('active'); overlays[2].setAttribute('aria-hidden', 'false'); }
+            }, 0.75);
+
+            // Overlay 4 Fade In (88% -> 100%)
+            tl.to(overlays[3], { 
+                opacity: 1, 
+                y: 0,
+                duration: 0.1,
+                onStart: () => { overlays[3].classList.remove('active'); overlays[3].setAttribute('aria-hidden', 'true'); },
+                onComplete: () => { overlays[3].classList.add('active'); overlays[3].setAttribute('aria-hidden', 'false'); },
+                onReverseComplete: () => { overlays[3].classList.remove('active'); overlays[3].setAttribute('aria-hidden', 'true'); }
+            }, 0.88);
+
+        }
+
+        // Kickoff
+        loadFrames();
+        
+        // Slight delay for GSAP to measure correctly
+        setTimeout(setupScrollTrigger, 100);
+
+        // =====================================================================
+        // AUTO SCROLL FEATURE
+        // =====================================================================
+        let autoScrollInterval = null;
+        let userInteractedTimeout = null;
+
+        function startAutoScroll() {
+            if (autoScrollInterval) return;
+            autoScrollInterval = setInterval(() => {
+                if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight - 10) {
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                } else {
+                    window.scrollBy({ top: 2, behavior: 'smooth' });
+                }
+            }, 30);
+        }
+
+        function stopAutoScroll() {
+            if (autoScrollInterval) {
+                clearInterval(autoScrollInterval);
+                autoScrollInterval = null;
+            }
+        }
+
+        function handleUserInteraction() {
+            stopAutoScroll();
+            clearTimeout(userInteractedTimeout);
+            userInteractedTimeout = setTimeout(startAutoScroll, 4000);
+        }
+
+        ['wheel', 'touchstart', 'keydown', 'mousedown'].forEach(evt => {
+            window.addEventListener(evt, handleUserInteraction, { passive: true });
+        });
+
+        setTimeout(startAutoScroll, 1500);
+
+    </script>
+</body>
+</html>
