@@ -1,492 +1,603 @@
 'use client';
 
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 
 export interface ArchitecturalCanvasProps {
   className?: string;
   heroRef?: React.RefObject<HTMLElement | null>;
 }
 
-interface Node {
-  x: number;
-  y: number;
-  vx: number;
-  vy: number;
-  baseVx: number;
-  baseVy: number;
-  radius: number;
-  opacity: number;
-  connectionsCount: number;
-}
-
-interface ActivePulse {
-  fromIndex: number;
-  toIndex: number;
-  progress: number;
-  speed: number;
-}
-
-const GOLD_COLOR = '#D4AF37';
-const MAX_CONN_DIST = 170;
-const MAX_CONN_DIST_SQ = MAX_CONN_DIST * MAX_CONN_DIST; // 28900
-const REPULSION_DIST = 180;
-const REPULSION_DIST_SQ = REPULSION_DIST * REPULSION_DIST; // 32400
-const MAX_CONNECTIONS_PER_NODE = 3;
-const MAX_PULSES = 4;
-
 export const ArchitecturalCanvas: React.FC<ArchitecturalCanvasProps> = ({
   className,
   heroRef,
 }) => {
-  const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const containerRef = useRef<HTMLDivElement | null>(null);
+  const svgRef = useRef<SVGSVGElement | null>(null);
 
-  // References for mutable animation state to avoid React re-renders
-  const nodesRef = useRef<Node[]>([]);
-  const pulsesRef = useRef<ActivePulse[]>([]);
-  const mouseRef = useRef<{ x: number; y: number; active: boolean }>({
-    x: -9999,
-    y: -9999,
-    active: false,
+  const [isReducedMotion, setIsReducedMotion] = useState<boolean>(false);
+  const [hasHover, setHasHover] = useState<boolean>(true);
+  const [isDrawn, setIsDrawn] = useState<boolean>(false);
+
+  // Parallax tracking values
+  const mouseRef = useRef<{ x: number; y: number; targetX: number; targetY: number }>({
+    x: 0,
+    y: 0,
+    targetX: 0,
+    targetY: 0,
   });
 
-  const widthRef = useRef<number>(0);
-  const heightRef = useRef<number>(0);
-  const lastTimeRef = useRef<number>(0);
-  const frameIdRef = useRef<number | null>(null);
-
-  const isIntersectingRef = useRef<boolean>(true);
-  const isVisibleRef = useRef<boolean>(true);
-  const isReducedMotionRef = useRef<boolean>(false);
-  const hasHoverRef = useRef<boolean>(true);
+  const [parallaxOffset, setParallaxOffset] = useState<{ x: number; y: number }>({
+    x: 0,
+    y: 0,
+  });
 
   useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-
-    // Determine container element (passed ref or canvas parent)
-    const container =
-      (heroRef && heroRef.current) || canvas.parentElement || document.body;
-
-    // Check media queries
+    // Media query checks
     const motionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
-    isReducedMotionRef.current = motionQuery.matches;
+    setIsReducedMotion(motionQuery.matches);
 
     const hoverQuery = window.matchMedia('(pointer: fine) and (hover: hover)');
-    hasHoverRef.current = hoverQuery.matches;
+    setHasHover(hoverQuery.matches);
 
-    const handleMotionChange = (e: MediaQueryListEvent) => {
-      isReducedMotionRef.current = e.matches;
-      if (e.matches) {
-        stopLoop();
-        drawStatic();
-      } else {
-        startLoop();
-      }
-    };
-
-    const handleHoverChange = (e: MediaQueryListEvent) => {
-      hasHoverRef.current = e.matches;
-      if (!e.matches) {
-        mouseRef.current.active = false;
-      }
-    };
+    const handleMotionChange = (e: MediaQueryListEvent) => setIsReducedMotion(e.matches);
+    const handleHoverChange = (e: MediaQueryListEvent) => setHasHover(e.matches);
 
     motionQuery.addEventListener('change', handleMotionChange);
     hoverQuery.addEventListener('change', handleHoverChange);
 
-    // Node Initialization
-    const initNodes = (w: number, h: number) => {
-      if (w <= 0 || h <= 0) return;
-      const targetCount = w < 768 ? 24 : 60;
-      const nodes: Node[] = [];
+    // Trigger reveal animation sequence once
+    const timer = setTimeout(() => {
+      setIsDrawn(true);
+    }, 100);
 
-      for (let i = 0; i < targetCount; i++) {
-        // Slow architectural drift (0.1 - 0.35 px/frame)
-        const angle = Math.random() * Math.PI * 2;
-        const speed = 0.1 + Math.random() * 0.25;
-        const baseVx = Math.cos(angle) * speed;
-        const baseVy = Math.sin(angle) * speed;
+    // Pointer Parallax Handler
+    const container =
+      (heroRef && heroRef.current) || containerRef.current?.parentElement || document.body;
 
-        nodes.push({
-          x: Math.random() * w,
-          y: Math.random() * h,
-          vx: baseVx,
-          vy: baseVy,
-          baseVx,
-          baseVy,
-          radius: 1.2 + Math.random() * 0.8, // 1.2px - 2.0px node radius
-          opacity: 0.25 + Math.random() * 0.35, // subtle opacity range
-          connectionsCount: 0,
-        });
-      }
-      nodesRef.current = nodes;
-      pulsesRef.current = [];
-    };
+    let animFrameId: number | null = null;
 
-    // Static Drawing for Reduced Motion
-    const drawStatic = () => {
-      const w = widthRef.current;
-      const h = heightRef.current;
-      if (w <= 0 || h <= 0) return;
-
-      ctx.clearRect(0, 0, w, h);
-      const nodes = nodesRef.current;
-
-      // Reset connection counts
-      for (let i = 0; i < nodes.length; i++) {
-        nodes[i].connectionsCount = 0;
-      }
-
-      // Static connecting lines
-      for (let i = 0; i < nodes.length; i++) {
-        const nodeA = nodes[i];
-        if (nodeA.connectionsCount >= MAX_CONNECTIONS_PER_NODE) continue;
-
-        for (let j = i + 1; j < nodes.length; j++) {
-          const nodeB = nodes[j];
-          if (nodeB.connectionsCount >= MAX_CONNECTIONS_PER_NODE) continue;
-
-          const dx = nodeB.x - nodeA.x;
-          const dy = nodeB.y - nodeA.y;
-          const distSq = dx * dx + dy * dy;
-
-          if (distSq < MAX_CONN_DIST_SQ) {
-            const alpha = (1 - distSq / MAX_CONN_DIST_SQ) * 0.12;
-            ctx.strokeStyle = `rgba(212, 175, 55, ${alpha.toFixed(3)})`;
-            ctx.lineWidth = 0.8;
-            ctx.beginPath();
-            ctx.moveTo(nodeA.x, nodeA.y);
-            ctx.lineTo(nodeB.x, nodeB.y);
-            ctx.stroke();
-
-            nodeA.connectionsCount++;
-            nodeB.connectionsCount++;
-          }
-        }
-      }
-
-      // Static Nodes
-      for (let i = 0; i < nodes.length; i++) {
-        const node = nodes[i];
-        ctx.fillStyle = `rgba(212, 175, 55, ${node.opacity.toFixed(2)})`;
-        ctx.beginPath();
-        ctx.arc(node.x, node.y, node.radius, 0, Math.PI * 2);
-        ctx.fill();
-      }
-    };
-
-    // Resize Buffer Logic with DPR capping
-    const handleResize = () => {
-      const rect = container.getBoundingClientRect();
-      const newWidth = Math.floor(rect.width || window.innerWidth);
-      const newHeight = Math.floor(rect.height || window.innerHeight);
-
-      if (newWidth <= 0 || newHeight <= 0) return;
-
-      const oldWidth = widthRef.current;
-      const oldHeight = heightRef.current;
-
-      const dpr = Math.min(window.devicePixelRatio || 1, 2);
-
-      canvas.width = Math.floor(newWidth * dpr);
-      canvas.height = Math.floor(newHeight * dpr);
-      canvas.style.width = `${newWidth}px`;
-      canvas.style.height = `${newHeight}px`;
-
-      ctx.setTransform(1, 0, 0, 1, 0, 0); // reset scale
-      ctx.scale(dpr, dpr);
-
-      widthRef.current = newWidth;
-      heightRef.current = newHeight;
-
-      if (nodesRef.current.length === 0 || oldWidth === 0 || oldHeight === 0) {
-        initNodes(newWidth, newHeight);
-      } else {
-        // Proportionally scale node coordinates on resize
-        const scaleX = newWidth / oldWidth;
-        const scaleY = newHeight / oldHeight;
-        for (let i = 0; i < nodesRef.current.length; i++) {
-          const n = nodesRef.current[i];
-          n.x *= scaleX;
-          n.y *= scaleY;
-        }
-      }
-
-      if (isReducedMotionRef.current) {
-        drawStatic();
-      }
-    };
-
-    // Pointer event listeners on hero container
     const handlePointerMove = (e: PointerEvent) => {
-      if (!hasHoverRef.current || isReducedMotionRef.current) return;
+      if (!hoverQuery.matches || motionQuery.matches) return;
       const rect = container.getBoundingClientRect();
-      mouseRef.current.x = e.clientX - rect.left;
-      mouseRef.current.y = e.clientY - rect.top;
-      mouseRef.current.active = true;
+      const relX = (e.clientX - rect.left) / rect.width - 0.5; // -0.5 to 0.5
+      const relY = (e.clientY - rect.top) / rect.height - 0.5;
+
+      mouseRef.current.targetX = relX * 14; // max ±7px shift
+      mouseRef.current.targetY = relY * 14;
     };
 
     const handlePointerLeave = () => {
-      mouseRef.current.active = false;
-      mouseRef.current.x = -9999;
-      mouseRef.current.y = -9999;
+      mouseRef.current.targetX = 0;
+      mouseRef.current.targetY = 0;
     };
 
-    container.addEventListener('pointermove', handlePointerMove, { passive: true });
-    container.addEventListener('pointerleave', handlePointerLeave, { passive: true });
-
-    // Main Render Loop
-    let pulseSpawnCounter = 0;
-
-    const animate = (timestamp: number) => {
-      if (!lastTimeRef.current) lastTimeRef.current = timestamp;
-
-      // Elapsed time in seconds, clamped between 0.001 and 0.064s to prevent jump after pause
-      const rawDt = (timestamp - lastTimeRef.current) / 1000;
-      const dt = Math.min(Math.max(rawDt, 0.001), 0.064);
-      lastTimeRef.current = timestamp;
-
-      const timeScale = dt * 60; // normalize to 60fps baseline
-
-      const w = widthRef.current;
-      const h = heightRef.current;
-      const nodes = nodesRef.current;
-      const pulses = pulsesRef.current;
+    const updateParallax = () => {
       const mouse = mouseRef.current;
+      mouse.x += (mouse.targetX - mouse.x) * 0.08;
+      mouse.y += (mouse.targetY - mouse.y) * 0.08;
 
-      ctx.clearRect(0, 0, w, h);
+      setParallaxOffset({
+        x: Math.round(mouse.x * 100) / 100,
+        y: Math.round(mouse.y * 100) / 100,
+      });
 
-      // Reset node connections count per frame
-      for (let i = 0; i < nodes.length; i++) {
-        nodes[i].connectionsCount = 0;
-      }
-
-      // Update Node Positions & Apply Pointer Repulsion
-      for (let i = 0; i < nodes.length; i++) {
-        const node = nodes[i];
-
-        // Pointer repulsion check (squared distance)
-        if (mouse.active && hasHoverRef.current) {
-          const dx = node.x - mouse.x;
-          const dy = node.y - mouse.y;
-          const distSq = dx * dx + dy * dy;
-
-          if (distSq > 0 && distSq < REPULSION_DIST_SQ) {
-            const dist = Math.sqrt(distSq);
-            const force = (REPULSION_DIST - dist) / REPULSION_DIST;
-            const pushX = (dx / dist) * force * 1.5;
-            const pushY = (dy / dist) * force * 1.5;
-
-            node.vx = node.vx * 0.9 + pushX * 0.1;
-            node.vy = node.vy * 0.9 + pushY * 0.1;
-          }
-        }
-
-        // Gradually decay velocity back toward base drift
-        node.vx += (node.baseVx - node.vx) * 0.02 * timeScale;
-        node.vy += (node.baseVy - node.vy) * 0.02 * timeScale;
-
-        // Apply movement
-        node.x += node.vx * timeScale;
-        node.y += node.vy * timeScale;
-
-        // Bounce smoothly off boundaries
-        if (node.x < 0) {
-          node.x = 0;
-          node.vx *= -1;
-          node.baseVx *= -1;
-        } else if (node.x > w) {
-          node.x = w;
-          node.vx *= -1;
-          node.baseVx *= -1;
-        }
-
-        if (node.y < 0) {
-          node.y = 0;
-          node.vy *= -1;
-          node.baseVy *= -1;
-        } else if (node.y > h) {
-          node.y = h;
-          node.vy *= -1;
-          node.baseVy *= -1;
-        }
-      }
-
-      // Active Connections Array to collect lines for pulse animation
-      const activeConnections: [number, number][] = [];
-
-      // Draw Structural Connection Lines
-      for (let i = 0; i < nodes.length; i++) {
-        const nodeA = nodes[i];
-        if (nodeA.connectionsCount >= MAX_CONNECTIONS_PER_NODE) continue;
-
-        for (let j = i + 1; j < nodes.length; j++) {
-          const nodeB = nodes[j];
-          if (nodeB.connectionsCount >= MAX_CONNECTIONS_PER_NODE) continue;
-
-          const dx = nodeB.x - nodeA.x;
-          const dy = nodeB.y - nodeA.y;
-          const distSq = dx * dx + dy * dy;
-
-          if (distSq < MAX_CONN_DIST_SQ) {
-            const alpha = (1 - distSq / MAX_CONN_DIST_SQ) * 0.16;
-            ctx.strokeStyle = `rgba(212, 175, 55, ${alpha.toFixed(3)})`;
-            ctx.lineWidth = 0.8;
-
-            ctx.beginPath();
-            ctx.moveTo(nodeA.x, nodeA.y);
-            ctx.lineTo(nodeB.x, nodeB.y);
-            ctx.stroke();
-
-            nodeA.connectionsCount++;
-            nodeB.connectionsCount++;
-            activeConnections.push([i, j]);
-          }
-        }
-      }
-
-      // Draw Nodes
-      for (let i = 0; i < nodes.length; i++) {
-        const node = nodes[i];
-        ctx.fillStyle = `rgba(212, 175, 55, ${node.opacity.toFixed(2)})`;
-        ctx.beginPath();
-        ctx.arc(node.x, node.y, node.radius, 0, Math.PI * 2);
-        ctx.fill();
-      }
-
-      // Infrequent, Subtle Line Pulse Animations
-      pulseSpawnCounter++;
-      if (
-        pulseSpawnCounter > 120 &&
-        pulses.length < MAX_PULSES &&
-        activeConnections.length > 0
-      ) {
-        pulseSpawnCounter = 0;
-        const randomConn =
-          activeConnections[
-            Math.floor(Math.random() * activeConnections.length)
-          ];
-        pulses.push({
-          fromIndex: randomConn[0],
-          toIndex: randomConn[1],
-          progress: 0,
-          speed: 0.008 + Math.random() * 0.006, // subtle travel speed
-        });
-      }
-
-      // Render & Update Active Pulses
-      for (let p = pulses.length - 1; p >= 0; p--) {
-        const pulse = pulses[p];
-        pulse.progress += pulse.speed * timeScale;
-
-        if (pulse.progress >= 1) {
-          pulses.splice(p, 1);
-          continue;
-        }
-
-        const nodeA = nodes[pulse.fromIndex];
-        const nodeB = nodes[pulse.toIndex];
-
-        if (nodeA && nodeB) {
-          const px = nodeA.x + (nodeB.x - nodeA.x) * pulse.progress;
-          const py = nodeA.y + (nodeB.y - nodeA.y) * pulse.progress;
-
-          // Pulse opacity peaks mid-travel
-          const pulseAlpha = Math.sin(pulse.progress * Math.PI) * 0.45;
-
-          ctx.fillStyle = `rgba(243, 229, 171, ${pulseAlpha.toFixed(3)})`;
-          ctx.beginPath();
-          ctx.arc(px, py, 1.8, 0, Math.PI * 2);
-          ctx.fill();
-        }
-      }
-
-      frameIdRef.current = requestAnimationFrame(animate);
+      animFrameId = requestAnimationFrame(updateParallax);
     };
 
-    const startLoop = () => {
-      if (
-        frameIdRef.current !== null ||
-        isReducedMotionRef.current ||
-        !isIntersectingRef.current ||
-        !isVisibleRef.current
-      ) {
-        return;
-      }
-      lastTimeRef.current = performance.now();
-      frameIdRef.current = requestAnimationFrame(animate);
-    };
+    if (hoverQuery.matches && !motionQuery.matches) {
+      container.addEventListener('pointermove', handlePointerMove, { passive: true });
+      container.addEventListener('pointerleave', handlePointerLeave, { passive: true });
+      animFrameId = requestAnimationFrame(updateParallax);
+    }
 
-    const stopLoop = () => {
-      if (frameIdRef.current !== null) {
-        cancelAnimationFrame(frameIdRef.current);
-        frameIdRef.current = null;
-      }
-    };
-
-    // ResizeObserver for Container Sizing
-    const resizeObserver = new ResizeObserver(() => {
-      handleResize();
-    });
-    resizeObserver.observe(container);
-
-    // IntersectionObserver for Offscreen Pause
-    const intersectionObserver = new IntersectionObserver(
+    // IntersectionObserver to pause rendering offscreen
+    const observer = new IntersectionObserver(
       (entries) => {
         const entry = entries[0];
-        isIntersectingRef.current = entry?.isIntersecting ?? true;
-        if (isIntersectingRef.current) {
-          startLoop();
-        } else {
-          stopLoop();
+        if (!entry.isIntersecting && animFrameId) {
+          cancelAnimationFrame(animFrameId);
+          animFrameId = null;
+        } else if (entry.isIntersecting && hoverQuery.matches && !motionQuery.matches && !animFrameId) {
+          animFrameId = requestAnimationFrame(updateParallax);
         }
       },
       { threshold: 0.05 }
     );
-    intersectionObserver.observe(container);
+    observer.observe(container);
 
-    // Document Visibility Listener
-    const handleVisibilityChange = () => {
-      isVisibleRef.current = !document.hidden;
-      if (!document.hidden) {
-        startLoop();
-      } else {
-        stopLoop();
-      }
-    };
-    document.addEventListener('visibilitychange', handleVisibilityChange);
-
-    // Initial setup & start loop
-    handleResize();
-    if (!isReducedMotionRef.current) {
-      startLoop();
-    }
-
-    // Cleanup on unmount or re-effect
     return () => {
-      stopLoop();
-      resizeObserver.disconnect();
-      intersectionObserver.disconnect();
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      clearTimeout(timer);
       motionQuery.removeEventListener('change', handleMotionChange);
       hoverQuery.removeEventListener('change', handleHoverChange);
       container.removeEventListener('pointermove', handlePointerMove);
       container.removeEventListener('pointerleave', handlePointerLeave);
+      observer.disconnect();
+      if (animFrameId) cancelAnimationFrame(animFrameId);
     };
   }, [heroRef]);
 
+  // Determine stroke animation styles based on reveal stage / reduced motion
+  const getLineStyle = (delayMs: number, strokeLength = 1000) => {
+    if (isReducedMotion) {
+      return {
+        strokeDasharray: 'none',
+        strokeDashoffset: 0,
+        opacity: 1,
+      };
+    }
+    return {
+      strokeDasharray: strokeLength,
+      strokeDashoffset: isDrawn ? 0 : strokeLength,
+      transition: `stroke-dashoffset 1.4s cubic-bezier(0.16, 1, 0.3, 1) ${delayMs}ms, opacity 0.8s ease ${delayMs}ms`,
+    };
+  };
+
+  const getFadeStyle = (delayMs: number) => {
+    if (isReducedMotion) {
+      return { opacity: 1 };
+    }
+    return {
+      opacity: isDrawn ? 1 : 0,
+      transition: `opacity 1.0s cubic-bezier(0.16, 1, 0.3, 1) ${delayMs}ms`,
+    };
+  };
+
   return (
-    <canvas
-      ref={canvasRef}
+    <div
+      ref={containerRef}
       aria-hidden="true"
       tabIndex={-1}
-      className={`absolute inset-0 w-full h-full pointer-events-none z-10 ${
+      className={`absolute inset-0 w-full h-full pointer-events-none select-none z-10 overflow-hidden ${
         className || ''
       }`}
-    />
+    >
+      <svg
+        ref={svgRef}
+        viewBox="0 0 1400 900"
+        preserveAspectRatio="xMidYMid slice"
+        className="w-full h-full text-[#D4AF37]"
+        style={{
+          transform: `translate3d(${parallaxOffset.x}px, ${parallaxOffset.y}px, 0)`,
+          willChange: 'transform',
+        }}
+      >
+        <defs>
+          {/* Subtle Diagonal Column Hatching Pattern */}
+          <pattern
+            id="columnHatch"
+            width="8"
+            height="8"
+            patternTransform="rotate(45 0 0)"
+            patternUnits="userSpaceOnUse"
+          >
+            <line
+              x1="0"
+              y1="0"
+              x2="0"
+              y2="8"
+              stroke="#D4AF37"
+              strokeWidth="1.2"
+              strokeOpacity="0.4"
+            />
+          </pattern>
+
+          {/* Gold Pulse Line Gradient */}
+          <linearGradient id="goldPulse" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stopColor="#D4AF37" stopOpacity="0.0" />
+            <stop offset="50%" stopColor="#FFF2A8" stopOpacity="0.8" />
+            <stop offset="100%" stopColor="#D4AF37" stopOpacity="0.0" />
+          </linearGradient>
+        </defs>
+
+        {/* ================================================================= */}
+        {/* LAYER A: FAINT DRAFTING GRID (BACKGROUND 50px SPACING) */}
+        {/* ================================================================= */}
+        <g opacity="0.45" style={getFadeStyle(100)}>
+          {/* Vertical Grid Lines */}
+          {[100, 200, 300, 400, 500, 600, 700, 800, 900, 1000, 1100, 1200, 1300].map((x) => (
+            <line
+              key={`vgrid-${x}`}
+              x1={x}
+              y1="40"
+              x2={x}
+              y2="860"
+              stroke="#D4AF37"
+              strokeWidth="0.5"
+              strokeOpacity={x >= 600 ? '0.08' : '0.03'}
+              strokeDasharray={x % 200 === 0 ? 'none' : '4 4'}
+            />
+          ))}
+          {/* Horizontal Grid Lines */}
+          {[100, 200, 300, 400, 500, 600, 700, 800].map((y) => (
+            <line
+              key={`hgrid-${y}`}
+              x1="40"
+              y1={y}
+              x2="1360"
+              y2={y}
+              stroke="#D4AF37"
+              strokeWidth="0.5"
+              strokeOpacity="0.06"
+              strokeDasharray={y % 200 === 0 ? 'none' : '4 4'}
+            />
+          ))}
+        </g>
+
+        {/* ================================================================= */}
+        {/* LAYER B: GRID AXIS BUBBLE MARKERS (A, B, C, D, E & 1, 2, 3, 4) */}
+        {/* ================================================================= */}
+        <g style={getFadeStyle(400)}>
+          {/* Top Axis Column Bubbles */}
+          {[
+            { label: 'A', x: 620 },
+            { label: 'B', x: 780 },
+            { label: 'C', x: 940 },
+            { label: 'D', x: 1100 },
+            { label: 'E', x: 1260 },
+          ].map((col) => (
+            <g key={`col-${col.label}`} transform={`translate(${col.x}, 70)`}>
+              <circle r="12" fill="#050505" stroke="#D4AF37" strokeWidth="1" strokeOpacity="0.4" />
+              <text
+                x="0"
+                y="4"
+                textAnchor="middle"
+                fill="#D4AF37"
+                fillOpacity="0.7"
+                fontSize="10"
+                fontFamily="monospace"
+                fontWeight="bold"
+              >
+                {col.label}
+              </text>
+              <line
+                x1="0"
+                y1="12"
+                x2="0"
+                y2="760"
+                stroke="#D4AF37"
+                strokeWidth="0.8"
+                strokeOpacity="0.15"
+                strokeDasharray="6 4 2 4"
+              />
+            </g>
+          ))}
+
+          {/* Right Axis Row Bubbles */}
+          {[
+            { label: '1', y: 160 },
+            { label: '2', y: 350 },
+            { label: '3', y: 540 },
+            { label: '4', y: 730 },
+          ].map((row) => (
+            <g key={`row-${row.label}`} transform={`translate(1310, ${row.y})`}>
+              <circle r="12" fill="#050505" stroke="#D4AF37" strokeWidth="1" strokeOpacity="0.4" />
+              <text
+                x="0"
+                y="4"
+                textAnchor="middle"
+                fill="#D4AF37"
+                fillOpacity="0.7"
+                fontSize="10"
+                fontFamily="monospace"
+                fontWeight="bold"
+              >
+                {row.label}
+              </text>
+              <line
+                x1="-690"
+                y1="0"
+                x2="-12"
+                y2="0"
+                stroke="#D4AF37"
+                strokeWidth="0.8"
+                strokeOpacity="0.15"
+                strokeDasharray="6 4 2 4"
+              />
+            </g>
+          ))}
+        </g>
+
+        {/* ================================================================= */}
+        {/* PHASE 1: OUTER FOOTPRINT & FOUNDATION SETBACK (DRAW DELAY: 200ms) */}
+        {/* ================================================================= */}
+        <g stroke="#D4AF37" fill="none">
+          {/* Building Setback Perimeter */}
+          <rect
+            x="600"
+            y="140"
+            width="680"
+            height="610"
+            strokeWidth="0.8"
+            strokeOpacity="0.3"
+            strokeDasharray="5 4"
+            style={getLineStyle(200, 2600)}
+          />
+
+          {/* Outer Structural Foundation Boundary */}
+          <path
+            d="M 620 160 H 1260 V 730 H 620 Z"
+            strokeWidth="1.8"
+            strokeOpacity="0.65"
+            style={getLineStyle(400, 2600)}
+          />
+
+          {/* Secondary Structural Envelope Offset */}
+          <path
+            d="M 628 168 H 1252 V 722 H 628 Z"
+            strokeWidth="0.8"
+            strokeOpacity="0.35"
+            style={getLineStyle(550, 2600)}
+          />
+        </g>
+
+        {/* ================================================================= */}
+        {/* PHASE 2: WALL THICKNESSES, PARTITIONS & DOORS (DRAW DELAY: 800ms) */}
+        {/* ================================================================= */}
+        <g stroke="#D4AF37" fill="none">
+          {/* Main Executive Atrium Partition Walls (Double parallel lines) */}
+          {/* Horizontal Corridor Wall */}
+          <path d="M 628 350 H 1100" strokeWidth="1.5" strokeOpacity="0.5" style={getLineStyle(800, 600)} />
+          <path d="M 628 358 H 1092" strokeWidth="0.8" strokeOpacity="0.3" style={getLineStyle(850, 600)} />
+
+          {/* Vertical Core Shear Wall */}
+          <path d="M 940 168 V 722" strokeWidth="1.8" strokeOpacity="0.55" style={getLineStyle(900, 600)} />
+          <path d="M 948 168 V 722" strokeWidth="0.8" strokeOpacity="0.3" style={getLineStyle(950, 600)} />
+
+          {/* Conference Suite Partition Wall */}
+          <path d="M 780 358 V 540 H 940" strokeWidth="1.2" strokeOpacity="0.45" style={getLineStyle(1050, 400)} />
+          <path d="M 788 366 V 532 H 932" strokeWidth="0.8" strokeOpacity="0.25" style={getLineStyle(1100, 400)} />
+
+          {/* Elevator Core Shaft Walls */}
+          <rect
+            x="960"
+            y="370"
+            width="120"
+            height="150"
+            strokeWidth="1.4"
+            strokeOpacity="0.5"
+            style={getLineStyle(1150, 600)}
+          />
+          <rect
+            x="966"
+            y="376"
+            width="108"
+            height="138"
+            strokeWidth="0.8"
+            strokeOpacity="0.3"
+            style={getLineStyle(1200, 500)}
+          />
+          {/* Elevator Shaft Diagonal Cross Cut */}
+          <line
+            x1="966"
+            y1="376"
+            x2="1074"
+            y2="514"
+            strokeWidth="0.8"
+            strokeOpacity="0.2"
+            strokeDasharray="4 4"
+            style={getLineStyle(1250, 200)}
+          />
+          <line
+            x1="1074"
+            y1="376"
+            x2="966"
+            y2="514"
+            strokeWidth="0.8"
+            strokeOpacity="0.2"
+            strokeDasharray="4 4"
+            style={getLineStyle(1250, 200)}
+          />
+
+          {/* Architectural Door Swings (Quarter-circle arcs) */}
+          {/* Atrium Door Swing */}
+          <path
+            d="M 780 350 A 45 45 0 0 1 825 395"
+            strokeWidth="1"
+            strokeOpacity="0.45"
+            strokeDasharray="3 3"
+            style={getLineStyle(1300, 100)}
+          />
+          <line x1="780" y1="350" x2="780" y2="395" strokeWidth="1" strokeOpacity="0.4" style={getLineStyle(1300, 50)} />
+
+          {/* Executive Suite Door Swing */}
+          <path
+            d="M 940 540 A 45 45 0 0 1 895 585"
+            strokeWidth="1"
+            strokeOpacity="0.45"
+            strokeDasharray="3 3"
+            style={getLineStyle(1350, 100)}
+          />
+          <line x1="940" y1="540" x2="895" y2="540" strokeWidth="1" strokeOpacity="0.4" style={getLineStyle(1350, 50)} />
+        </g>
+
+        {/* ================================================================= */}
+        {/* REINFORCED STRUCTURAL STEEL COLUMNS (GRID INTERSECTIONS) */}
+        {/* ================================================================= */}
+        <g fill="url(#columnHatch)" stroke="#D4AF37" strokeWidth="1" style={getFadeStyle(1400)}>
+          {[
+            { x: 620, y: 160 },
+            { x: 780, y: 160 },
+            { x: 940, y: 160 },
+            { x: 1100, y: 160 },
+            { x: 1260, y: 160 },
+
+            { x: 620, y: 350 },
+            { x: 780, y: 350 },
+            { x: 940, y: 350 },
+            { x: 1100, y: 350 },
+            { x: 1260, y: 350 },
+
+            { x: 620, y: 540 },
+            { x: 780, y: 540 },
+            { x: 940, y: 540 },
+            { x: 1100, y: 540 },
+            { x: 1260, y: 540 },
+
+            { x: 620, y: 730 },
+            { x: 780, y: 730 },
+            { x: 940, y: 730 },
+            { x: 1100, y: 730 },
+            { x: 1260, y: 730 },
+          ].map((col, idx) => (
+            <rect
+              key={`col-rect-${idx}`}
+              x={col.x - 7}
+              y={col.y - 7}
+              width="14"
+              height="14"
+              strokeOpacity="0.6"
+            />
+          ))}
+        </g>
+
+        {/* ================================================================= */}
+        {/* PHASE 3: DIMENSION LINES, CALLOUTS & SECTION MARKERS (2.0s DELAY) */}
+        {/* ================================================================= */}
+        <g opacity="0.8" style={getFadeStyle(1600)}>
+          {/* Overall Horizontal Dimension Line (Top) */}
+          <g transform="translate(0, 115)">
+            <line x1="620" y1="0" x2="1260" y2="0" stroke="#D4AF37" strokeWidth="0.8" strokeOpacity="0.4" />
+            {/* Tick Marks */}
+            <line x1="620" y1="-5" x2="620" y2="5" stroke="#D4AF37" strokeWidth="1" strokeOpacity="0.6" />
+            <line x1="780" y1="-4" x2="780" y2="4" stroke="#D4AF37" strokeWidth="0.8" strokeOpacity="0.4" />
+            <line x1="940" y1="-4" x2="940" y2="4" stroke="#D4AF37" strokeWidth="0.8" strokeOpacity="0.4" />
+            <line x1="1100" y1="-4" x2="1100" y2="4" stroke="#D4AF37" strokeWidth="0.8" strokeOpacity="0.4" />
+            <line x1="1260" y1="-5" x2="1260" y2="5" stroke="#D4AF37" strokeWidth="1" strokeOpacity="0.6" />
+            {/* Dimension Text */}
+            <rect x="900" y="-9" width="80" height="18" fill="#050505" stroke="#D4AF37" strokeWidth="0.5" strokeOpacity="0.3" />
+            <text x="940" y="3" textAnchor="middle" fill="#D4AF37" fillOpacity="0.8" fontSize="9" fontFamily="monospace">
+              64'-0" OVERALL
+            </text>
+          </g>
+
+          {/* Sub-Dimension Line (Segment 1) */}
+          <g transform="translate(0, 130)">
+            <line x1="620" y1="0" x2="780" y2="0" stroke="#D4AF37" strokeWidth="0.6" strokeOpacity="0.3" />
+            <line x1="620" y1="-3" x2="620" y2="3" stroke="#D4AF37" strokeWidth="0.8" />
+            <line x1="780" y1="-3" x2="780" y2="3" stroke="#D4AF37" strokeWidth="0.8" />
+            <text x="700" y="-3" textAnchor="middle" fill="#D4AF37" fillOpacity="0.65" fontSize="8" fontFamily="monospace">
+              16'-0"
+            </text>
+          </g>
+
+          {/* Sub-Dimension Line (Segment 2) */}
+          <g transform="translate(0, 130)">
+            <line x1="780" y1="0" x2="940" y2="0" stroke="#D4AF37" strokeWidth="0.6" strokeOpacity="0.3" />
+            <line x1="780" y1="-3" x2="780" y2="3" stroke="#D4AF37" strokeWidth="0.8" />
+            <line x1="940" y1="-3" x2="940" y2="3" stroke="#D4AF37" strokeWidth="0.8" />
+            <text x="860" y="-3" textAnchor="middle" fill="#D4AF37" fillOpacity="0.65" fontSize="8" fontFamily="monospace">
+              16'-0"
+            </text>
+          </g>
+
+          {/* Vertical Dimension Line (Left Side of Drawing) */}
+          <g transform="translate(585, 0)">
+            <line x1="0" y1="160" x2="0" y2="730" stroke="#D4AF37" strokeWidth="0.8" strokeOpacity="0.4" />
+            <line x1="-5" y1="160" x2="5" y2="160" stroke="#D4AF37" strokeWidth="1" strokeOpacity="0.6" />
+            <line x1="-5" y1="730" x2="5" y2="730" stroke="#D4AF37" strokeWidth="1" strokeOpacity="0.6" />
+            <rect x="-10" y="425" width="20" height="70" fill="#050505" stroke="#D4AF37" strokeWidth="0.5" strokeOpacity="0.3" />
+            <text
+              x="0"
+              y="460"
+              textAnchor="middle"
+              transform="rotate(-90 0 460)"
+              fill="#D4AF37"
+              fillOpacity="0.8"
+              fontSize="9"
+              fontFamily="monospace"
+            >
+              57'-0" HEIGHT
+            </text>
+          </g>
+
+          {/* Section Cut Callout Marker (S-01 / A-102) */}
+          <g transform="translate(700, 250)">
+            <circle r="16" fill="#050505" stroke="#D4AF37" strokeWidth="1.2" strokeOpacity="0.6" />
+            <line x1="-16" y1="0" x2="16" y2="0" stroke="#D4AF37" strokeWidth="0.8" strokeOpacity="0.6" />
+            <polygon points="0,-16 -6,-24 6,-24" fill="#D4AF37" fillOpacity="0.6" />
+            <text x="0" y="-4" textAnchor="middle" fill="#D4AF37" fontSize="9" fontFamily="monospace" fontWeight="bold">
+              S1
+            </text>
+            <text x="0" y="10" textAnchor="middle" fill="#D4AF37" fillOpacity="0.7" fontSize="8" fontFamily="monospace">
+              A-102
+            </text>
+          </g>
+
+          {/* Technical Engineering Specifications Box (Right Corner Callout) */}
+          <g transform="translate(1000, 600)">
+            <rect
+              x="0"
+              y="0"
+              width="230"
+              height="100"
+              fill="#050505"
+              fillOpacity="0.85"
+              stroke="#D4AF37"
+              strokeWidth="0.8"
+              strokeOpacity="0.3"
+              rx="2"
+            />
+            {/* Title */}
+            <text x="12" y="20" fill="#D4AF37" fontSize="9" fontFamily="monospace" fontWeight="bold" letterSpacing="1">
+              STRUCTURAL SCHEMATIC
+            </text>
+            <line x1="12" y1="26" x2="218" y2="26" stroke="#D4AF37" strokeWidth="0.5" strokeOpacity="0.2" />
+
+            <text x="12" y="42" fill="#F8F8F8" fillOpacity="0.6" fontSize="8" fontFamily="monospace">
+              FOUNDATION: REINFORCED SLAB 12"
+            </text>
+            <text x="12" y="56" fill="#F8F8F8" fillOpacity="0.6" fontSize="8" fontFamily="monospace">
+              FRAMING: W14x90 STRUCTURAL STEEL
+            </text>
+            <text x="12" y="70" fill="#F8F8F8" fillOpacity="0.6" fontSize="8" fontFamily="monospace">
+              CORE: 10" SHEAR CONCRETE WALLS
+            </text>
+            <text x="12" y="84" fill="#D4AF37" fillOpacity="0.8" fontSize="8" fontFamily="monospace">
+              SCALE: 1/8" = 1'-0" | ZONE 4
+            </text>
+          </g>
+        </g>
+
+        {/* ================================================================= */}
+        {/* LAYER D: OCCASIONAL SUBTLE GOLD AXIS HIGHLIGHT PULSE */}
+        {/* ================================================================= */}
+        {!isReducedMotion && (
+          <g opacity="0.75">
+            {/* Travelling Light Pulse along Main Column Grid C Axis (x=940) */}
+            <line
+              x1="940"
+              y1="140"
+              x2="940"
+              y2="760"
+              stroke="url(#goldPulse)"
+              strokeWidth="2.5"
+              className="animate-blueprint-pulse"
+            />
+          </g>
+        )}
+      </svg>
+
+      {/* Inline Keyframes for Subtle Axis Pulse */}
+      <style jsx>{`
+        @keyframes blueprintPulse {
+          0% {
+            stroke-dasharray: 100 800;
+            stroke-dashoffset: 800;
+          }
+          50% {
+            stroke-dasharray: 200 800;
+            stroke-dashoffset: 0;
+          }
+          100% {
+            stroke-dasharray: 100 800;
+            stroke-dashoffset: -800;
+          }
+        }
+        .animate-blueprint-pulse {
+          animation: blueprintPulse 7s ease-in-out infinite;
+        }
+      `}</style>
+    </div>
   );
 };
 

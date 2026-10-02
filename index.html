@@ -196,8 +196,161 @@
             <div class="absolute inset-0 z-2" style="background: radial-gradient(circle at 80% 30%, rgba(212, 175, 55, 0.08) 0%, transparent 65%);" aria-hidden="true"></div>
         </div>
 
-        <!-- LAYER 2: Architectural Grid Canvas (Sparse Gold Points & Vector CAD Lines) -->
-        <canvas id="architectural-hero-canvas" class="absolute inset-0 z-10 pointer-events-none" aria-hidden="true"></canvas>
+        <!-- LAYER 2: Architectural Construction Blueprint SVG Overlay -->
+        <div id="architectural-hero-blueprint" aria-hidden="true" class="absolute inset-0 w-full h-full pointer-events-none select-none z-10 overflow-hidden">
+            <svg id="hero-blueprint-svg" viewBox="0 0 1400 900" preserveAspectRatio="xMidYMid slice" class="w-full h-full text-[#D4AF37] transition-transform duration-300 ease-out">
+                <defs>
+                    <pattern id="columnHatchHtml" width="8" height="8" patternTransform="rotate(45 0 0)" patternUnits="userSpaceOnUse">
+                        <line x1="0" y1="0" x2="0" y2="8" stroke="#D4AF37" stroke-width="1.2" stroke-opacity="0.4" />
+                    </pattern>
+                    <linearGradient id="goldPulseHtml" x1="0%" y1="0%" x2="100%" y2="0%">
+                        <stop offset="0%" stop-color="#D4AF37" stop-opacity="0.0" />
+                        <stop offset="50%" stop-color="#FFF2A8" stop-opacity="0.8" />
+                        <stop offset="100%" stop-color="#D4AF37" stop-opacity="0.0" />
+                    </linearGradient>
+                </defs>
+
+                <!-- Drafting Grid -->
+                <g opacity="0.45" class="bp-fade-step">
+                    <line x1="100" y1="40" x2="100" y2="860" stroke="#D4AF37" stroke-width="0.5" stroke-opacity="0.03" stroke-dasharray="4 4" />
+                    <line x1="300" y1="40" x2="300" y2="860" stroke="#D4AF37" stroke-width="0.5" stroke-opacity="0.03" stroke-dasharray="4 4" />
+                    <line x1="500" y1="40" x2="500" y2="860" stroke="#D4AF37" stroke-width="0.5" stroke-opacity="0.03" stroke-dasharray="4 4" />
+                    <line x1="600" y1="40" x2="600" y2="860" stroke="#D4AF37" stroke-width="0.5" stroke-opacity="0.08" />
+                    <line x1="700" y1="40" x2="700" y2="860" stroke="#D4AF37" stroke-width="0.5" stroke-opacity="0.05" stroke-dasharray="4 4" />
+                    <line x1="800" y1="40" x2="800" y2="860" stroke="#D4AF37" stroke-width="0.5" stroke-opacity="0.08" />
+                    <line x1="900" y1="40" x2="900" y2="860" stroke="#D4AF37" stroke-width="0.5" stroke-opacity="0.05" stroke-dasharray="4 4" />
+                    <line x1="1000" y1="40" x2="1000" y2="860" stroke="#D4AF37" stroke-width="0.5" stroke-opacity="0.08" />
+                    <line x1="1100" y1="40" x2="1100" y2="860" stroke="#D4AF37" stroke-width="0.5" stroke-opacity="0.05" stroke-dasharray="4 4" />
+                    <line x1="1200" y1="40" x2="1200" y2="860" stroke="#D4AF37" stroke-width="0.5" stroke-opacity="0.08" />
+                    <line x1="1300" y1="40" x2="1300" y2="860" stroke="#D4AF37" stroke-width="0.5" stroke-opacity="0.05" stroke-dasharray="4 4" />
+
+                    <line x1="40" y1="160" x2="1360" y2="160" stroke="#D4AF37" stroke-width="0.5" stroke-opacity="0.06" />
+                    <line x1="40" y1="350" x2="1360" y2="350" stroke="#D4AF37" stroke-width="0.5" stroke-opacity="0.06" />
+                    <line x1="40" y1="540" x2="1360" y2="540" stroke="#D4AF37" stroke-width="0.5" stroke-opacity="0.06" />
+                    <line x1="40" y1="730" x2="1360" y2="730" stroke="#D4AF37" stroke-width="0.5" stroke-opacity="0.06" />
+                </g>
+
+                <!-- Grid Axis Bubbles (A, B, C, D, E & 1, 2, 3, 4) -->
+                <g class="bp-fade-step">
+                    <!-- Top Axis -->
+                    <g transform="translate(620, 70)"><circle r="12" fill="#050505" stroke="#D4AF37" stroke-width="1" stroke-opacity="0.4" /><text x="0" y="4" text-anchor="middle" fill="#D4AF37" fill-opacity="0.7" font-size="10" font-family="monospace" font-weight="bold">A</text><line x1="0" y1="12" x2="0" y2="760" stroke="#D4AF37" stroke-width="0.8" stroke-opacity="0.15" stroke-dasharray="6 4 2 4" /></g>
+                    <g transform="translate(780, 70)"><circle r="12" fill="#050505" stroke="#D4AF37" stroke-width="1" stroke-opacity="0.4" /><text x="0" y="4" text-anchor="middle" fill="#D4AF37" fill-opacity="0.7" font-size="10" font-family="monospace" font-weight="bold">B</text><line x1="0" y1="12" x2="0" y2="760" stroke="#D4AF37" stroke-width="0.8" stroke-opacity="0.15" stroke-dasharray="6 4 2 4" /></g>
+                    <g transform="translate(940, 70)"><circle r="12" fill="#050505" stroke="#D4AF37" stroke-width="1" stroke-opacity="0.4" /><text x="0" y="4" text-anchor="middle" fill="#D4AF37" fill-opacity="0.7" font-size="10" font-family="monospace" font-weight="bold">C</text><line x1="0" y1="12" x2="0" y2="760" stroke="#D4AF37" stroke-width="0.8" stroke-opacity="0.15" stroke-dasharray="6 4 2 4" /></g>
+                    <g transform="translate(1100, 70)"><circle r="12" fill="#050505" stroke="#D4AF37" stroke-width="1" stroke-opacity="0.4" /><text x="0" y="4" text-anchor="middle" fill="#D4AF37" fill-opacity="0.7" font-size="10" font-family="monospace" font-weight="bold">D</text><line x1="0" y1="12" x2="0" y2="760" stroke="#D4AF37" stroke-width="0.8" stroke-opacity="0.15" stroke-dasharray="6 4 2 4" /></g>
+                    <g transform="translate(1260, 70)"><circle r="12" fill="#050505" stroke="#D4AF37" stroke-width="1" stroke-opacity="0.4" /><text x="0" y="4" text-anchor="middle" fill="#D4AF37" fill-opacity="0.7" font-size="10" font-family="monospace" font-weight="bold">E</text><line x1="0" y1="12" x2="0" y2="760" stroke="#D4AF37" stroke-width="0.8" stroke-opacity="0.15" stroke-dasharray="6 4 2 4" /></g>
+
+                    <!-- Right Axis -->
+                    <g transform="translate(1310, 160)"><circle r="12" fill="#050505" stroke="#D4AF37" stroke-width="1" stroke-opacity="0.4" /><text x="0" y="4" text-anchor="middle" fill="#D4AF37" fill-opacity="0.7" font-size="10" font-family="monospace" font-weight="bold">1</text><line x1="-690" y1="0" x2="-12" y2="0" stroke="#D4AF37" stroke-width="0.8" stroke-opacity="0.15" stroke-dasharray="6 4 2 4" /></g>
+                    <g transform="translate(1310, 350)"><circle r="12" fill="#050505" stroke="#D4AF37" stroke-width="1" stroke-opacity="0.4" /><text x="0" y="4" text-anchor="middle" fill="#D4AF37" fill-opacity="0.7" font-size="10" font-family="monospace" font-weight="bold">2</text><line x1="-690" y1="0" x2="-12" y2="0" stroke="#D4AF37" stroke-width="0.8" stroke-opacity="0.15" stroke-dasharray="6 4 2 4" /></g>
+                    <g transform="translate(1310, 540)"><circle r="12" fill="#050505" stroke="#D4AF37" stroke-width="1" stroke-opacity="0.4" /><text x="0" y="4" text-anchor="middle" fill="#D4AF37" fill-opacity="0.7" font-size="10" font-family="monospace" font-weight="bold">3</text><line x1="-690" y1="0" x2="-12" y2="0" stroke="#D4AF37" stroke-width="0.8" stroke-opacity="0.15" stroke-dasharray="6 4 2 4" /></g>
+                    <g transform="translate(1310, 730)"><circle r="12" fill="#050505" stroke="#D4AF37" stroke-width="1" stroke-opacity="0.4" /><text x="0" y="4" text-anchor="middle" fill="#D4AF37" fill-opacity="0.7" font-size="10" font-family="monospace" font-weight="bold">4</text><line x1="-690" y1="0" x2="-12" y2="0" stroke="#D4AF37" stroke-width="0.8" stroke-opacity="0.15" stroke-dasharray="6 4 2 4" /></g>
+                </g>
+
+                <!-- Outer Footprint Boundary -->
+                <g stroke="#D4AF37" fill="none">
+                    <rect x="600" y="140" width="680" height="610" stroke-width="0.8" stroke-opacity="0.3" stroke-dasharray="5 4" class="bp-line-step-1" />
+                    <path d="M 620 160 H 1260 V 730 H 620 Z" stroke-width="1.8" stroke-opacity="0.65" class="bp-line-step-1" />
+                    <path d="M 628 168 H 1252 V 722 H 628 Z" stroke-width="0.8" stroke-opacity="0.35" class="bp-line-step-1" />
+                </g>
+
+                <!-- Wall Thicknesses, Partitions & Doors -->
+                <g stroke="#D4AF37" fill="none">
+                    <path d="M 628 350 H 1100" stroke-width="1.5" stroke-opacity="0.5" class="bp-line-step-2" />
+                    <path d="M 628 358 H 1092" stroke-width="0.8" stroke-opacity="0.3" class="bp-line-step-2" />
+                    <path d="M 940 168 V 722" stroke-width="1.8" stroke-opacity="0.55" class="bp-line-step-2" />
+                    <path d="M 948 168 V 722" stroke-width="0.8" stroke-opacity="0.3" class="bp-line-step-2" />
+                    <path d="M 780 358 V 540 H 940" stroke-width="1.2" stroke-opacity="0.45" class="bp-line-step-2" />
+
+                    <!-- Elevator Core -->
+                    <rect x="960" y="370" width="120" height="150" stroke-width="1.4" stroke-opacity="0.5" class="bp-line-step-2" />
+                    <rect x="966" y="376" width="108" height="138" stroke-width="0.8" stroke-opacity="0.3" class="bp-line-step-2" />
+                    <line x1="966" y1="376" x2="1074" y2="514" stroke-width="0.8" stroke-opacity="0.2" stroke-dasharray="4 4" class="bp-line-step-2" />
+                    <line x1="1074" y1="376" x2="966" y2="514" stroke-width="0.8" stroke-opacity="0.2" stroke-dasharray="4 4" class="bp-line-step-2" />
+
+                    <!-- Door Swings -->
+                    <path d="M 780 350 A 45 45 0 0 1 825 395" stroke-width="1" stroke-opacity="0.45" stroke-dasharray="3 3" class="bp-line-step-2" />
+                    <line x1="780" y1="350" x2="780" y2="395" stroke-width="1" stroke-opacity="0.4" class="bp-line-step-2" />
+                    <path d="M 940 540 A 45 45 0 0 1 895 585" stroke-width="1" stroke-opacity="0.45" stroke-dasharray="3 3" class="bp-line-step-2" />
+                    <line x1="940" y1="540" x2="895" y2="540" stroke-width="1" stroke-opacity="0.4" class="bp-line-step-2" />
+                </g>
+
+                <!-- Columns -->
+                <g fill="url(#columnHatchHtml)" stroke="#D4AF37" stroke-width="1" class="bp-fade-step">
+                    <rect x="613" y="153" width="14" height="14" stroke-opacity="0.6" />
+                    <rect x="773" y="153" width="14" height="14" stroke-opacity="0.6" />
+                    <rect x="933" y="153" width="14" height="14" stroke-opacity="0.6" />
+                    <rect x="1093" y="153" width="14" height="14" stroke-opacity="0.6" />
+                    <rect x="1253" y="153" width="14" height="14" stroke-opacity="0.6" />
+
+                    <rect x="613" y="343" width="14" height="14" stroke-opacity="0.6" />
+                    <rect x="773" y="343" width="14" height="14" stroke-opacity="0.6" />
+                    <rect x="933" y="343" width="14" height="14" stroke-opacity="0.6" />
+                    <rect x="1093" y="343" width="14" height="14" stroke-opacity="0.6" />
+                    <rect x="1253" y="343" width="14" height="14" stroke-opacity="0.6" />
+
+                    <rect x="613" y="533" width="14" height="14" stroke-opacity="0.6" />
+                    <rect x="773" y="533" width="14" height="14" stroke-opacity="0.6" />
+                    <rect x="933" y="533" width="14" height="14" stroke-opacity="0.6" />
+                    <rect x="1093" y="533" width="14" height="14" stroke-opacity="0.6" />
+                    <rect x="1253" y="533" width="14" height="14" stroke-opacity="0.6" />
+
+                    <rect x="613" y="723" width="14" height="14" stroke-opacity="0.6" />
+                    <rect x="773" y="723" width="14" height="14" stroke-opacity="0.6" />
+                    <rect x="933" y="723" width="14" height="14" stroke-opacity="0.6" />
+                    <rect x="1093" y="723" width="14" height="14" stroke-opacity="0.6" />
+                    <rect x="1253" y="723" width="14" height="14" stroke-opacity="0.6" />
+                </g>
+
+                <!-- Dimension Lines & Callouts -->
+                <g opacity="0.8" class="bp-fade-step">
+                    <!-- Top Overall Dimension -->
+                    <g transform="translate(0, 115)">
+                        <line x1="620" y1="0" x2="1260" y2="0" stroke="#D4AF37" stroke-width="0.8" stroke-opacity="0.4" />
+                        <line x1="620" y1="-5" x2="620" y2="5" stroke="#D4AF37" stroke-width="1" stroke-opacity="0.6" />
+                        <line x1="780" y1="-4" x2="780" y2="4" stroke="#D4AF37" stroke-width="0.8" stroke-opacity="0.4" />
+                        <line x1="940" y1="-4" x2="940" y2="4" stroke="#D4AF37" stroke-width="0.8" stroke-opacity="0.4" />
+                        <line x1="1100" y1="-4" x2="1100" y2="4" stroke="#D4AF37" stroke-width="0.8" stroke-opacity="0.4" />
+                        <line x1="1260" y1="-5" x2="1260" y2="5" stroke="#D4AF37" stroke-width="1" stroke-opacity="0.6" />
+                        <rect x="900" y="-9" width="80" height="18" fill="#050505" stroke="#D4AF37" stroke-width="0.5" stroke-opacity="0.3" />
+                        <text x="940" y="3" text-anchor="middle" fill="#D4AF37" fill-opacity="0.8" font-size="9" font-family="monospace">64'-0" OVERALL</text>
+                    </g>
+
+                    <!-- Left Vertical Dimension -->
+                    <g transform="translate(585, 0)">
+                        <line x1="0" y1="160" x2="0" y2="730" stroke="#D4AF37" stroke-width="0.8" stroke-opacity="0.4" />
+                        <line x1="-5" y1="160" x2="5" y2="160" stroke="#D4AF37" stroke-width="1" stroke-opacity="0.6" />
+                        <line x1="-5" y1="730" x2="5" y2="730" stroke="#D4AF37" stroke-width="1" stroke-opacity="0.6" />
+                        <rect x="-10" y="425" width="20" height="70" fill="#050505" stroke="#D4AF37" stroke-width="0.5" stroke-opacity="0.3" />
+                        <text x="0" y="460" text-anchor="middle" transform="rotate(-90 0 460)" fill="#D4AF37" fill-opacity="0.8" font-size="9" font-family="monospace">57'-0" HEIGHT</text>
+                    </g>
+
+                    <!-- Section Tag S1 -->
+                    <g transform="translate(700, 250)">
+                        <circle r="16" fill="#050505" stroke="#D4AF37" stroke-width="1.2" stroke-opacity="0.6" />
+                        <line x1="-16" y1="0" x2="16" y2="0" stroke="#D4AF37" stroke-width="0.8" stroke-opacity="0.6" />
+                        <polygon points="0,-16 -6,-24 6,-24" fill="#D4AF37" fill-opacity="0.6" />
+                        <text x="0" y="-4" text-anchor="middle" fill="#D4AF37" font-size="9" font-family="monospace" font-weight="bold">S1</text>
+                        <text x="0" y="10" text-anchor="middle" fill="#D4AF37" fill-opacity="0.7" font-size="8" font-family="monospace">A-102</text>
+                    </g>
+
+                    <!-- Structural Spec Card Callout -->
+                    <g transform="translate(1000, 600)">
+                        <rect x="0" y="0" width="230" height="100" fill="#050505" fill-opacity="0.85" stroke="#D4AF37" stroke-width="0.8" stroke-opacity="0.3" rx="2" />
+                        <text x="12" y="20" fill="#D4AF37" font-size="9" font-family="monospace" font-weight="bold" letter-spacing="1">STRUCTURAL SCHEMATIC</text>
+                        <line x1="12" y1="26" x2="218" y2="26" stroke="#D4AF37" stroke-width="0.5" stroke-opacity="0.2" />
+                        <text x="12" y="42" fill="#F8F8F8" fill-opacity="0.6" font-size="8" font-family="monospace">FOUNDATION: REINFORCED SLAB 12"</text>
+                        <text x="12" y="56" fill="#F8F8F8" fill-opacity="0.6" font-size="8" font-family="monospace">FRAMING: W14x90 STRUCTURAL STEEL</text>
+                        <text x="12" y="70" fill="#F8F8F8" fill-opacity="0.6" font-size="8" font-family="monospace">CORE: 10" SHEAR CONCRETE WALLS</text>
+                        <text x="12" y="84" fill="#D4AF37" fill-opacity="0.8" font-size="8" font-family="monospace">SCALE: 1/8" = 1'-0" | ZONE 4</text>
+                    </g>
+                </g>
+
+                <!-- Subtle Axis Pulse -->
+                <g opacity="0.75">
+                    <line x1="940" y1="140" x2="940" y2="760" stroke="url(#goldPulseHtml)" stroke-width="2.5" class="animate-blueprint-pulse-html" />
+                </g>
+            </svg>
+        </div>
 
         <!-- LAYER 3: Noise Texture Overlay (3.5% Opacity) -->
         <div class="absolute inset-0 z-15 pointer-events-none opacity-[0.035]" style="background-image: url(&quot;data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E&quot;);" aria-hidden="true"></div>
@@ -1166,22 +1319,9 @@
         // =====================================================================
         (function initArchitecturalCanvas() {
             const heroSection = document.getElementById("hero");
-            const heroCanvas = document.getElementById("architectural-hero-canvas");
+            const blueprintSvg = document.getElementById("hero-blueprint-svg");
             const underline = document.getElementById("hero-underline");
-            if (!heroCanvas || !heroSection) return;
-
-            const ctx = heroCanvas.getContext("2d");
-            if (!ctx) return;
-
-            let animId = null;
-            let width = 0;
-            let height = 0;
-            let dpr = 1;
-            let lastTime = 0;
-
-            const mouse = { x: -9999, y: -9999, active: false };
-            let isIntersecting = true;
-            let isDocumentVisible = true;
+            if (!heroSection) return;
 
             const motionQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
             let prefersReducedMotion = motionQuery.matches;
@@ -1199,291 +1339,76 @@
                 }
             }
 
-            const MAX_CONN_DIST = 170;
-            const MAX_CONN_DIST_SQ = MAX_CONN_DIST * MAX_CONN_DIST; // 28900
-            const REPULSION_DIST = 180;
-            const REPULSION_DIST_SQ = REPULSION_DIST * REPULSION_DIST; // 32400
-            const MAX_CONNECTIONS_PER_NODE = 3;
-            const MAX_PULSES = 4;
+            if (!blueprintSvg) return;
 
-            let nodes = [];
-            let pulses = [];
-
-            function initNodes(w, h) {
-                if (w <= 0 || h <= 0) return;
-                const targetCount = w < 768 ? 24 : 60;
-                nodes = [];
-                for (let i = 0; i < targetCount; i++) {
-                    const angle = Math.random() * Math.PI * 2;
-                    const speed = 0.1 + Math.random() * 0.25;
-                    const baseVx = Math.cos(angle) * speed;
-                    const baseVy = Math.sin(angle) * speed;
-                    nodes.push({
-                        x: Math.random() * w,
-                        y: Math.random() * h,
-                        vx: baseVx,
-                        vy: baseVy,
-                        baseVx: baseVx,
-                        baseVy: baseVy,
-                        radius: 1.2 + Math.random() * 0.8,
-                        opacity: 0.25 + Math.random() * 0.35,
-                        connectionsCount: 0
-                    });
-                }
-                pulses = [];
+            if (prefersReducedMotion) {
+                blueprintSvg.classList.add("drawn");
+            } else {
+                setTimeout(() => {
+                    blueprintSvg.classList.add("drawn");
+                }, 100);
             }
 
-            function drawStatic() {
-                if (width <= 0 || height <= 0) return;
-                ctx.clearRect(0, 0, width, height);
+            let mouseX = 0;
+            let mouseY = 0;
+            let currentX = 0;
+            let currentY = 0;
+            let animId = null;
+            let isIntersecting = true;
+            let isDocumentVisible = true;
 
-                for (let i = 0; i < nodes.length; i++) nodes[i].connectionsCount = 0;
-
-                for (let i = 0; i < nodes.length; i++) {
-                    const nodeA = nodes[i];
-                    if (nodeA.connectionsCount >= MAX_CONNECTIONS_PER_NODE) continue;
-
-                    for (let j = i + 1; j < nodes.length; j++) {
-                        const nodeB = nodes[j];
-                        if (nodeB.connectionsCount >= MAX_CONNECTIONS_PER_NODE) continue;
-
-                        const dx = nodeB.x - nodeA.x;
-                        const dy = nodeB.y - nodeA.y;
-                        const distSq = dx * dx + dy * dy;
-
-                        if (distSq < MAX_CONN_DIST_SQ) {
-                            const alpha = (1 - distSq / MAX_CONN_DIST_SQ) * 0.12;
-                            ctx.strokeStyle = `rgba(212, 175, 55, ${alpha.toFixed(3)})`;
-                            ctx.lineWidth = 0.8;
-                            ctx.beginPath();
-                            ctx.moveTo(nodeA.x, nodeA.y);
-                            ctx.lineTo(nodeB.x, nodeB.y);
-                            ctx.stroke();
-
-                            nodeA.connectionsCount++;
-                            nodeB.connectionsCount++;
-                        }
-                    }
+            function updateParallax() {
+                if (!hasHover || prefersReducedMotion || !isIntersecting || !isDocumentVisible) {
+                    blueprintSvg.style.transform = "translate3d(0px, 0px, 0px)";
+                    animId = null;
+                    return;
                 }
 
-                for (let i = 0; i < nodes.length; i++) {
-                    const n = nodes[i];
-                    ctx.fillStyle = `rgba(212, 175, 55, ${n.opacity.toFixed(2)})`;
-                    ctx.beginPath();
-                    ctx.arc(n.x, n.y, n.radius, 0, Math.PI * 2);
-                    ctx.fill();
-                }
-            }
+                currentX += (mouseX - currentX) * 0.05;
+                currentY += (mouseY - currentY) * 0.05;
 
-            function handleResize() {
-                const rect = heroSection.getBoundingClientRect();
-                const newWidth = Math.floor(rect.width || window.innerWidth);
-                const newHeight = Math.floor(rect.height || window.innerHeight);
-                if (newWidth <= 0 || newHeight <= 0) return;
+                blueprintSvg.style.transform = `translate3d(${currentX.toFixed(2)}px, ${currentY.toFixed(2)}px, 0px)`;
 
-                const oldWidth = width;
-                const oldHeight = height;
-
-                dpr = Math.min(window.devicePixelRatio || 1, 2);
-
-                heroCanvas.width = Math.floor(newWidth * dpr);
-                heroCanvas.height = Math.floor(newHeight * dpr);
-                heroCanvas.style.width = newWidth + "px";
-                heroCanvas.style.height = newHeight + "px";
-
-                ctx.setTransform(1, 0, 0, 1, 0, 0);
-                ctx.scale(dpr, dpr);
-
-                width = newWidth;
-                height = newHeight;
-
-                if (nodes.length === 0 || oldWidth === 0 || oldHeight === 0) {
-                    initNodes(newWidth, newHeight);
+                if (Math.abs(mouseX - currentX) > 0.01 || Math.abs(mouseY - currentY) > 0.01) {
+                    animId = requestAnimationFrame(updateParallax);
                 } else {
-                    const scaleX = newWidth / oldWidth;
-                    const scaleY = newHeight / oldHeight;
-                    for (let i = 0; i < nodes.length; i++) {
-                        nodes[i].x *= scaleX;
-                        nodes[i].y *= scaleY;
-                    }
-                }
-
-                if (prefersReducedMotion) {
-                    drawStatic();
-                }
-            }
-
-            let pulseCounter = 0;
-
-            function render(timestamp) {
-                if (!lastTime) lastTime = timestamp;
-                const rawDt = (timestamp - lastTime) / 1000;
-                const dt = Math.min(Math.max(rawDt, 0.001), 0.064);
-                lastTime = timestamp;
-                const timeScale = dt * 60;
-
-                ctx.clearRect(0, 0, width, height);
-
-                for (let i = 0; i < nodes.length; i++) nodes[i].connectionsCount = 0;
-
-                // Update Nodes & Pointer Repulsion
-                for (let i = 0; i < nodes.length; i++) {
-                    const node = nodes[i];
-
-                    if (mouse.active && hasHover) {
-                        const dx = node.x - mouse.x;
-                        const dy = node.y - mouse.y;
-                        const distSq = dx * dx + dy * dy;
-
-                        if (distSq > 0 && distSq < REPULSION_DIST_SQ) {
-                            const dist = Math.sqrt(distSq);
-                            const force = (REPULSION_DIST - dist) / REPULSION_DIST;
-                            const pushX = (dx / dist) * force * 1.5;
-                            const pushY = (dy / dist) * force * 1.5;
-
-                            node.vx = node.vx * 0.9 + pushX * 0.1;
-                            node.vy = node.vy * 0.9 + pushY * 0.1;
-                        }
-                    }
-
-                    node.vx += (node.baseVx - node.vx) * 0.02 * timeScale;
-                    node.vy += (node.baseVy - node.vy) * 0.02 * timeScale;
-
-                    node.x += node.vx * timeScale;
-                    node.y += node.vy * timeScale;
-
-                    if (node.x < 0) { node.x = 0; node.vx *= -1; node.baseVx *= -1; }
-                    else if (node.x > width) { node.x = width; node.vx *= -1; node.baseVx *= -1; }
-
-                    if (node.y < 0) { node.y = 0; node.vy *= -1; node.baseVy *= -1; }
-                    else if (node.y > height) { node.y = height; node.vy *= -1; node.baseVy *= -1; }
-                }
-
-                const activeConnections = [];
-
-                // Connections
-                for (let i = 0; i < nodes.length; i++) {
-                    const nodeA = nodes[i];
-                    if (nodeA.connectionsCount >= MAX_CONNECTIONS_PER_NODE) continue;
-
-                    for (let j = i + 1; j < nodes.length; j++) {
-                        const nodeB = nodes[j];
-                        if (nodeB.connectionsCount >= MAX_CONNECTIONS_PER_NODE) continue;
-
-                        const dx = nodeB.x - nodeA.x;
-                        const dy = nodeB.y - nodeA.y;
-                        const distSq = dx * dx + dy * dy;
-
-                        if (distSq < MAX_CONN_DIST_SQ) {
-                            const alpha = (1 - distSq / MAX_CONN_DIST_SQ) * 0.16;
-                            ctx.strokeStyle = `rgba(212, 175, 55, ${alpha.toFixed(3)})`;
-                            ctx.lineWidth = 0.8;
-                            ctx.beginPath();
-                            ctx.moveTo(nodeA.x, nodeA.y);
-                            ctx.lineTo(nodeB.x, nodeB.y);
-                            ctx.stroke();
-
-                            nodeA.connectionsCount++;
-                            nodeB.connectionsCount++;
-                            activeConnections.push([i, j]);
-                        }
-                    }
-                }
-
-                // Draw Node Dots
-                for (let i = 0; i < nodes.length; i++) {
-                    const node = nodes[i];
-                    ctx.fillStyle = `rgba(212, 175, 55, ${node.opacity.toFixed(2)})`;
-                    ctx.beginPath();
-                    ctx.arc(node.x, node.y, node.radius, 0, Math.PI * 2);
-                    ctx.fill();
-                }
-
-                // Pulses along connections
-                pulseCounter++;
-                if (pulseCounter > 120 && pulses.length < MAX_PULSES && activeConnections.length > 0) {
-                    pulseCounter = 0;
-                    const randomConn = activeConnections[Math.floor(Math.random() * activeConnections.length)];
-                    pulses.push({
-                        fromIndex: randomConn[0],
-                        toIndex: randomConn[1],
-                        progress: 0,
-                        speed: 0.008 + Math.random() * 0.006
-                    });
-                }
-
-                for (let p = pulses.length - 1; p >= 0; p--) {
-                    const pulse = pulses[p];
-                    pulse.progress += pulse.speed * timeScale;
-                    if (pulse.progress >= 1) {
-                        pulses.splice(p, 1);
-                        continue;
-                    }
-                    const nodeA = nodes[pulse.fromIndex];
-                    const nodeB = nodes[pulse.toIndex];
-                    if (nodeA && nodeB) {
-                        const px = nodeA.x + (nodeB.x - nodeA.x) * pulse.progress;
-                        const py = nodeA.y + (nodeB.y - nodeA.y) * pulse.progress;
-                        const pulseAlpha = Math.sin(pulse.progress * Math.PI) * 0.45;
-
-                        ctx.fillStyle = `rgba(243, 229, 171, ${pulseAlpha.toFixed(3)})`;
-                        ctx.beginPath();
-                        ctx.arc(px, py, 1.8, 0, Math.PI * 2);
-                        ctx.fill();
-                    }
-                }
-
-                animId = requestAnimationFrame(render);
-            }
-
-            function startLoop() {
-                if (animId !== null || prefersReducedMotion || !isIntersecting || !isDocumentVisible) return;
-                lastTime = performance.now();
-                animId = requestAnimationFrame(render);
-            }
-
-            function stopLoop() {
-                if (animId !== null) {
-                    cancelAnimationFrame(animId);
                     animId = null;
                 }
             }
 
-            // Listeners
-            heroSection.addEventListener("pointermove", (e) => {
+            function onPointerMove(e) {
                 if (!hasHover || prefersReducedMotion) return;
                 const rect = heroSection.getBoundingClientRect();
-                mouse.x = e.clientX - rect.left;
-                mouse.y = e.clientY - rect.top;
-                mouse.active = true;
-            }, { passive: true });
+                const relX = (e.clientX - rect.left) / rect.width - 0.5;
+                const relY = (e.clientY - rect.top) / rect.height - 0.5;
 
-            heroSection.addEventListener("pointerleave", () => {
-                mouse.active = false;
-                mouse.x = -9999;
-                mouse.y = -9999;
-            }, { passive: true });
+                mouseX = relX * 14; // max +-7px
+                mouseY = relY * 14;
 
-            const resizeObserver = new ResizeObserver(handleResize);
-            resizeObserver.observe(heroSection);
+                if (!animId) {
+                    animId = requestAnimationFrame(updateParallax);
+                }
+            }
+
+            function onPointerLeave() {
+                mouseX = 0;
+                mouseY = 0;
+                if (!animId) {
+                    animId = requestAnimationFrame(updateParallax);
+                }
+            }
+
+            heroSection.addEventListener("pointermove", onPointerMove, { passive: true });
+            heroSection.addEventListener("pointerleave", onPointerLeave, { passive: true });
 
             const intersectionObserver = new IntersectionObserver((entries) => {
                 isIntersecting = entries[0]?.isIntersecting ?? true;
-                if (isIntersecting) startLoop();
-                else stopLoop();
             }, { threshold: 0.05 });
             intersectionObserver.observe(heroSection);
 
             document.addEventListener("visibilitychange", () => {
                 isDocumentVisible = !document.hidden;
-                if (isDocumentVisible) startLoop();
-                else stopLoop();
             });
-
-            handleResize();
-            if (!prefersReducedMotion) {
-                startLoop();
-            }
         })();
     </script>
 </body>
